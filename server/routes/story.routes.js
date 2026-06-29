@@ -8,7 +8,7 @@
  * GET  /api/users/:userId/stories — get stories of a specific user
  */
 const router = require('express').Router();
-const auth = require('../middleware/auth.middleware');
+const { requireAuth: auth } = require('../middleware/auth.middleware');
 const Story = require('../models/Story');
 const User = require('../models/User');
 

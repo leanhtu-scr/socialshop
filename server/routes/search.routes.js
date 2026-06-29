@@ -3,7 +3,7 @@
  * GET /api/search?q=...&type=all|user|post|product
  */
 const router = require('express').Router();
-const auth = require('../middleware/auth.middleware');
+const { requireAuth: auth } = require('../middleware/auth.middleware');
 const User = require('../models/User');
 const Post = require('../models/Post');
 const Product = require('../models/Product');

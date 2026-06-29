@@ -6,7 +6,7 @@
  * PATCH /api/messages/:convId/read  — mark messages as read
  */
 const router = require('express').Router();
-const auth = require('../middleware/auth.middleware');
+const { requireAuth: auth } = require('../middleware/auth.middleware');
 const { Message, Conversation } = require('../models/Message');
 const User = require('../models/User');
 
