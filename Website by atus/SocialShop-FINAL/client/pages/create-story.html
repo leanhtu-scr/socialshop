@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Tạo Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+/* ── Layout ── */
+.story-editor {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding-bottom: 90px;
+}
+/* ── Type tabs ── */
+.type-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+.type-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.type-tab.active {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(124,92,252,.1);
+}
+
+/* ── Preview canvas ── */
+.story-preview {
+  margin: 16px;
+  border-radius: 20px;
+  overflow: hidden;
+  aspect-ratio: 9/16;
+  max-height: 52svh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a2e;
+  border: 1.5px solid var(--border);
+}
+.story-preview img,
+.story-preview video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  position: absolute; inset: 0;
+}
+.story-text-overlay {
+  position: absolute;
+  width: 90%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  word-break: break-word;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  pointer-events: none;
+}
+.preview-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+.preview-empty-icon { font-size: 48px; }
+
+/* ── Controls ── */
+.controls-section {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ctrl-label {
+  font-size: 12px;
+  color: var(--text-faint);
+  min-width: 60px;
+}
+.text-input-story {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-body);
+  resize: none;
+}
+.text-input-story:focus { outline: none; border-color: var(--primary); }
+
+/* Background palette */
+.bg-palette {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.bg-swatch {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  transition: transform .15s;
+  flex-shrink: 0;
+}
+.bg-swatch.active { border-color: #fff; transform: scale(1.15); }
+
+/* Color picker row */
+.color-swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.c-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .15s;
+}
+.c-swatch.active { border-color: #fff; transform: scale(1.2); }
+
+/* Upload zone */
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 13px;
+  transition: border-color .2s;
+}
+.upload-zone:hover { border-color: var(--primary); color: var(--primary); }
+.upload-zone-icon { font-size: 32px; }
+
+/* Caption input */
+.caption-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  box-sizing: border-box;
+}
+.caption-input:focus { outline: none; border-color: var(--primary); }
+
+/* Bottom action */
+.story-action-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  padding: 14px 16px 28px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+}
+.story-publish-btn {
+  flex: 1;
+  padding: 15px;
+  background: var(--grad);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.story-publish-btn:disabled { opacity: .5; }
+.story-cancel-btn {
+  padding: 15px 20px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Loading overlay */
+.upload-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 999;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+.upload-overlay.active { display: flex; }
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid rgba(255,255,255,.2);
+  border-top-color: #7C5CFC;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" onclick="history.back()">←</button>
+    <span class="logo" style="font-size:15px">Tạo Story</span>
+    <span style="width:36px"></span>
+  </header>
+
+  <div class="story-editor">
+    <!-- Type selector -->
+    <div class="type-tabs">
+      <div class="type-tab active" data-type="text" onclick="setType('text')">✏️ Văn bản</div>
+      <div class="type-tab" data-type="image" onclick="setType('image')">🖼️ Ảnh</div>
+      <div class="type-tab" data-type="video" onclick="setType('video')">🎬 Video</div>
+    </div>
+
+    <!-- Preview -->
+    <div class="story-preview" id="storyPreview">
+      <div class="preview-empty" id="previewEmpty">
+        <div class="preview-empty-icon">✨</div>
+        <span>Xem trước story của bạn</span>
+      </div>
+      <img id="previewImg" style="display:none">
+      <video id="previewVideo" muted playsinline loop style="display:none"></video>
+      <div class="story-text-overlay" id="textOverlay" style="display:none"></div>
+    </div>
+
+    <!-- Controls (changes based on type) -->
+    <div class="controls-section" id="controlsSection">
+      <!-- TEXT type controls -->
+      <div id="textControls">
+        <textarea class="text-input-story" id="storyText" rows="3"
+          placeholder="Nhập nội dung story..." oninput="updateTextPreview()"></textarea>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Màu chữ</span>
+          <div class="color-swatches" id="colorSwatches"></div>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Nền</span>
+          <div class="bg-palette" id="bgPalette"></div>
+        </div>
+      </div>
+
+      <!-- IMAGE / VIDEO type controls -->
+      <div id="mediaControls" style="display:none">
+        <div class="upload-zone" id="uploadZone" onclick="triggerMediaPick()">
+          <div class="upload-zone-icon" id="uploadZoneIcon">📁</div>
+          <span id="uploadZoneText">Nhấn để chọn ảnh hoặc video</span>
+        </div>
+        <input type="file" id="mediaInput" style="display:none" accept="image/*,video/*" onchange="handleMediaSelect(this)">
+      </div>
+
+      <!-- Caption (shared) -->
+      <div>
+        <input class="caption-input" id="storyCaption" placeholder="Thêm chú thích (không bắt buộc)...">
+      </div>
+    </div>
+  </div>
+
+  <!-- Publish bar -->
+  <div class="story-action-bar">
+    <button class="story-cancel-btn" onclick="history.back()">Hủy</button>
+    <button class="story-publish-btn" id="publishBtn" onclick="publishStory()">
+      🚀 Đăng Story (24h)
+    </button>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="upload-overlay" id="uploadOverlay">
+    <div class="spinner"></div>
+    <span id="overlayText">Đang tải ảnh lên...</span>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/upload.js"></script>
+<script>
+// ── State ───────────────────────────────────────────────────────────────
+let currentType = 'text';
+let selectedBg  = 'linear-gradient(135deg,#7C5CFC,#FF6B6B)';
+let selectedColor = '#ffffff';
+let mediaFile   = null;
+let mediaUrl    = null; // URL sau khi upload
+
+const BG_OPTIONS = [
+  'linear-gradient(135deg,#7C5CFC,#FF6B6B)',
+  'linear-gradient(135deg,#2EE6A6,#7C5CFC)',
+  'linear-gradient(135deg,#FFC95C,#FF6B6B)',
+  'linear-gradient(135deg,#0EA5E9,#6366F1)',
+  'linear-gradient(135deg,#F43F5E,#FB923C)',
+  '#1a1a2e',
+  '#0f172a',
+  '#052e16',
+];
+
+const COLOR_OPTIONS = [
+  '#ffffff','#000000','#FFC95C','#2EE6A6','#FF6B6B','#7C5CFC','#0EA5E9','#F43F5E',
+];
+
+// ── Init ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (!requireLogin()) return;
+  renderBgPalette();
+  renderColorSwatches();
+  applyBg();
+});
+
+function renderBgPalette() {
+  const el = document.getElementById('bgPalette');
+  el.innerHTML = BG_OPTIONS.map((bg, i) =>
+    `<div class="bg-swatch ${i===0?'active':''}" style="background:${bg}"
+      onclick="selectBg(this,'${bg.replace(/'/g,"\\'")}')" title="${bg}"></div>`
+  ).join('');
+}
+
+function renderColorSwatches() {
+  const el = document.getElementById('colorSwatches');
+  el.innerHTML = COLOR_OPTIONS.map((c, i) =>
+    `<div class="c-swatch ${i===0?'active':''}" style="background:${c}"
+      onclick="selectColor(this,'${c}')"></div>`
+  ).join('');
+}
+
+// ── Type switching ────────────────────────────────────────────────────────
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.type === type)
+  );
+  document.getElementById('textControls').style.display  = type === 'text' ? '' : 'none';
+  document.getElementById('mediaControls').style.display = type !== 'text' ? '' : 'none';
+  document.getElementById('mediaInput').accept = type === 'video' ? 'video/*' : 'image/*';
+  document.getElementById('uploadZoneIcon').textContent  = type === 'video' ? '🎬' : '🖼️';
+  document.getElementById('uploadZoneText').textContent  = type === 'video'
+    ? 'Nhấn để chọn video' : 'Nhấn để chọn ảnh';
+  resetPreview();
+}
+
+function resetPreview() {
+  document.getElementById('previewImg').style.display    = 'none';
+  document.getElementById('previewVideo').style.display  = 'none';
+  document.getElementById('textOverlay').style.display   = 'none';
+  document.getElementById('previewEmpty').style.display  = 'flex';
+  mediaFile = null; mediaUrl = null;
+}
+
+// ── Text preview ─────────────────────────────────────────────────────────
+function updateTextPreview() {
+  const val = document.getElementById('storyText').value;
+  const overlay = document.getElementById('textOverlay');
+  const empty   = document.getElementById('previewEmpty');
+  if (val.trim()) {
+    overlay.textContent  = val;
+    overlay.style.color  = selectedColor;
+    overlay.style.display = '';
+    empty.style.display  = 'none';
+  } else {
+    overlay.style.display = 'none';
+    empty.style.display  = 'flex';
+  }
+}
+
+function selectBg(el, bg) {
+  selectedBg = bg;
+  document.querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  applyBg();
+}
+
+function applyBg() {
+  const preview = document.getElementById('storyPreview');
+  if (currentType === 'text') {
+    preview.style.background = selectedBg;
+  }
+}
+
+function selectColor(el, color) {
+  selectedColor = color;
+  document.querySelectorAll('.c-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('textOverlay').style.color = color;
+}
+
+// ── Media select ──────────────────────────────────────────────────────────
+function triggerMediaPick() {
+  document.getElementById('mediaInput').click();
+}
+
+function handleMediaSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  mediaFile = file;
+
+  const preview = document.getElementById('storyPreview');
+  const img     = document.getElementById('previewImg');
+  const vid     = document.getElementById('previewVideo');
+  const empty   = document.getElementById('previewEmpty');
+
+  empty.style.display = 'none';
+  const reader = new FileReader();
+  reader.onload = e => {
+    if (file.type.startsWith('video/')) {
+      img.style.display = 'none';
+      vid.src = e.target.result;
+      vid.style.display = '';
+      vid.play();
+    } else {
+      vid.style.display = 'none';
+      img.src = e.target.result;
+      img.style.display = '';
+    }
+    document.getElementById('uploadZoneText').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Publish ───────────────────────────────────────────────────────────────
+async function publishStory() {
+  const btn = document.getElementById('publishBtn');
+  btn.disabled = true;
+
+  try {
+    const overlay = document.getElementById('uploadOverlay');
+    const caption = document.getElementById('storyCaption').value.trim();
+
+    let storyPayload = { caption };
+
+    if (currentType === 'text') {
+      const text = document.getElementById('storyText').value.trim();
+      if (!text) {
+        showToast('Vui lòng nhập nội dung story', 'error');
+        btn.disabled = false;
+        return;
+      }
+      storyPayload.type  = 'text';
+      storyPayload.text  = text;
+      storyPayload.bg    = selectedBg;
+      storyPayload.color = selectedColor;
+
+    } else {
+      if (!mediaFile) {
+        showToast('Vui lòng chọn ảnh hoặc video', 'error');
+        btn.disabled = false;
+        return;
+      }
+
+      // Upload media first
+      overlay.classList.add('active');
+      document.getElementById('overlayText').textContent =
+        currentType === 'video' ? 'Đang tải video lên...' : 'Đang tải ảnh lên...';
+
+      try {
+        mediaUrl = await SSUpload.uploadImage(mediaFile);
+      } catch (err) {
+        overlay.classList.remove('active');
+        showToast(err.message || 'Upload thất bại', 'error');
+        btn.disabled = false;
+        return;
+      }
+
+      overlay.classList.remove('active');
+      storyPayload.type = currentType; // 'image' | 'video'
+      storyPayload.url  = mediaUrl;
+    }
+
+    // Post story
+    overlay.classList.add('active');
+    document.getElementById('overlayText').textContent = 'Đang đăng story...';
+
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE_URL}/stories`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(storyPayload),
+    });
+
+    overlay.classList.remove('active');
+
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.message || 'Đăng story thất bại');
+    }
+
+    showToast('Story đã được đăng! ✨', 'success');
+    setTimeout(() => location.href = '../index.html', 1200);
+
+  } catch (err) {
+    document.getElementById('uploadOverlay').classList.remove('active');
+    showToast(err.message || 'Có lỗi xảy ra', 'error');
+    btn.disabled = false;
+  }
+}
+
+// ── Toast ────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  let t = document.getElementById('globalToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'globalToast';
+    t.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+      padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;
+      z-index:9999;transition:opacity .3s;white-space:nowrap;`;
+    document.body.appendChild(t);
+  }
+  const colors = { success:'#2EE6A6', error:'#FF6B6B', info:'#7C5CFC' };
+  t.style.background = colors[type] || colors.info;
+  t.style.color = '#fff';
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+</script>
+</body>
+</html>

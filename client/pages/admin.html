@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.admin-tabs { display:flex; overflow-x:auto; gap:4px; padding:10px 16px; scrollbar-width:none; border-bottom:1px solid var(--border); }
+.atab { padding:8px 16px; border-radius:20px; font-size:13px; font-weight:600; white-space:nowrap; cursor:pointer; background:var(--surface); color:var(--text-dim); transition:all .2s; }
+.atab.active { background:var(--grad); color:#fff; }
+
+/* Stats cards */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:14px 16px; }
+.stat-card { background:var(--surface); border-radius:14px; padding:14px; }
+.stat-card-icon { font-size:24px; margin-bottom:8px; }
+.stat-card-num { font-family:var(--font-mono); font-size:22px; font-weight:700; line-height:1; }
+.stat-card-label { font-size:12px; color:var(--text-faint); margin-top:4px; }
+.stat-card.accent .stat-card-num { color:var(--accent); }
+.stat-card.primary .stat-card-num { color:var(--primary); }
+.stat-card.green .stat-card-num { color:#2EE6A6; }
+
+/* Table-like list */
+.admin-section { padding:0 16px 8px; }
+.section-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.section-hdr-title { font-size:14px; font-weight:700; }
+.section-hdr-link { font-size:12px; color:var(--primary); }
+
+.data-row { display:flex; align-items:center; gap:10px; padding:10px; background:var(--surface); border-radius:12px; margin-bottom:6px; }
+.data-avatar { width:36px; height:36px; border-radius:50%; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.data-info { flex:1; min-width:0; }
+.data-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.data-sub { font-size:11px; color:var(--text-faint); margin-top:2px; }
+.data-badge { font-size:11px; padding:3px 8px; border-radius:999px; }
+.badge-pending { background:rgba(255,201,92,.15); color:#FFC95C; }
+.badge-confirmed { background:rgba(46,230,166,.15); color:#2EE6A6; }
+.badge-shipping { background:rgba(124,92,252,.15); color:#7C5CFC; }
+.badge-delivered { background:rgba(46,230,166,.2); color:#2EE6A6; }
+.badge-cancelled { background:rgba(255,107,107,.15); color:#FF6B6B; }
+.badge-admin { background:rgba(255,107,107,.15); color:#FF6B6B; }
+.badge-user { background:rgba(124,92,252,.15); color:#7C5CFC; }
+
+/* Manage users tab */
+.search-bar { display:flex; gap:8px; margin-bottom:12px; }
+.search-input { flex:1; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:10px; color:var(--text); font-size:14px; }
+.search-input:focus { outline:none; border-color:var(--primary); }
+.action-btn-sm { padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; }
+.btn-danger { background:rgba(255,107,107,.15); color:#FF6B6B; }
+.btn-primary-sm { background:var(--grad); color:#fff; }
+
+/* Posts/Products admin */
+.post-admin-item { background:var(--surface); border-radius:12px; padding:12px; margin-bottom:8px; }
+.post-admin-text { font-size:13px; color:var(--text-dim); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.delete-post-btn { background:rgba(255,107,107,.1); color:#FF6B6B; border:none; padding:5px 10px; border-radius:8px; font-size:12px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" onclick="history.back()">←</button>
+    <span class="logo" style="font-size:15px">⚙️ Quản trị</span>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <div id="authGuard" style="display:none;text-align:center;padding:60px 20px;color:var(--text-faint)">
+    <div style="font-size:40px;margin-bottom:14px">🔒</div>
+    <div>Bạn cần quyền quản trị viên để truy cập trang này</div>
+    <a href="login.html" style="color:var(--primary);display:inline-block;margin-top:14px">Đăng nhập</a>
+  </div>
+
+  <div id="adminContent" style="display:none">
+    <div class="admin-tabs">
+      <div class="atab active" onclick="showAdminTab('dashboard')">📊 Dashboard</div>
+      <div class="atab" onclick="showAdminTab('users')">👥 Người dùng</div>
+      <div class="atab" onclick="showAdminTab('posts')">📝 Bài viết</div>
+      <div class="atab" onclick="showAdminTab('products')">🛍️ Sản phẩm</div>
+      <div class="atab" onclick="showAdminTab('orders')">📦 Đơn hàng</div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" style="opacity:.5"><div class="stat-card-icon">⏳</div><div class="stat-card-num">...</div><div class="stat-card-label">Đang tải</div></div>
+        <div class="stat-card" style="opacity:.5"><div class="stat-card-icon">⏳</div><div class="stat-card-num">...</div><div class="stat-card-label">Đang tải</div></div>
+      </div>
+
+      <div class="admin-section">
+        <div class="section-hdr">
+          <div class="section-hdr-title">📦 Đơn hàng gần đây</div>
+        </div>
+        <div id="recentOrders">
+          <div style="color:var(--text-faint);font-size:13px">Đang tải...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div id="tab-users" style="display:none;padding:14px 16px">
+      <div class="search-bar">
+        <input class="search-input" id="userSearch" placeholder="Tìm theo username hoặc email..." oninput="searchUsers()">
+      </div>
+      <div id="usersList"><div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Đang tải...</div></div>
+    </div>
+
+    <!-- POSTS -->
+    <div id="tab-posts" style="display:none;padding:14px 16px">
+      <div id="postsList"><div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Đang tải...</div></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="tab-products" style="display:none;padding:14px 16px">
+      <div id="productsList"><div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Đang tải...</div></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div id="tab-orders" style="display:none;padding:14px 16px">
+      <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none">
+        <button class="action-btn-sm btn-primary-sm" onclick="loadOrders()">Tất cả</button>
+        <button class="action-btn-sm" style="background:var(--surface);color:var(--text)" onclick="loadOrders('pending')">Chờ xử lý</button>
+        <button class="action-btn-sm" style="background:var(--surface);color:var(--text)" onclick="loadOrders('shipping')">Đang giao</button>
+        <button class="action-btn-sm" style="background:var(--surface);color:var(--text)" onclick="loadOrders('delivered')">Đã giao</button>
+      </div>
+      <div id="ordersList"><div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Đang tải...</div></div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+let currentAdminTab = 'dashboard';
+
+function formatPrice(n) { return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n); }
+
+function showAdminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+  document.getElementById(`tab-${tab}`).style.display = 'block';
+  document.querySelectorAll('.atab').forEach((el, i) => {
+    const tabs = ['dashboard','users','posts','products','orders'];
+    el.classList.toggle('active', tabs[i] === tab);
+  });
+  if (tab === 'users') loadUsers();
+  if (tab === 'posts') loadAdminPosts();
+  if (tab === 'products') loadAdminProducts();
+  if (tab === 'orders') loadOrders();
+}
+
+async function loadDashboard() {
+  try {
+    const data = await apiRequest('/admin/stats', { auth: true });
+    const { stats, ordersByStatus, recentOrders } = data;
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card primary"><div class="stat-card-icon">👥</div><div class="stat-card-num">${stats.totalUsers.toLocaleString()}</div><div class="stat-card-label">Tổng người dùng (+${stats.newUsers7d} tuần này)</div></div>
+      <div class="stat-card"><div class="stat-card-icon">📝</div><div class="stat-card-num">${stats.totalPosts.toLocaleString()}</div><div class="stat-card-label">Bài viết</div></div>
+      <div class="stat-card"><div class="stat-card-icon">🛍️</div><div class="stat-card-num">${stats.totalProducts.toLocaleString()}</div><div class="stat-card-label">Sản phẩm đang bán</div></div>
+      <div class="stat-card accent"><div class="stat-card-icon">💰</div><div class="stat-card-num">${(stats.revenue/1e6).toFixed(1)}M</div><div class="stat-card-label">Doanh thu (₫)</div></div>
+      <div class="stat-card green"><div class="stat-card-icon">📦</div><div class="stat-card-num">${stats.totalOrders}</div><div class="stat-card-label">Tổng đơn hàng</div></div>
+    `;
+
+    const STATUS_LABELS = { pending:'Chờ xử lý', confirmed:'Đã xác nhận', shipping:'Đang giao', delivered:'Đã giao', cancelled:'Đã hủy' };
+    document.getElementById('recentOrders').innerHTML = recentOrders.map(o => `
+      <div class="data-row" onclick="window.location='order-detail.html?id=${o._id}'" style="cursor:pointer">
+        <div class="data-avatar">📦</div>
+        <div class="data-info">
+          <div class="data-name">#${o._id.slice(-8).toUpperCase()} · ${o.buyer?.username || '—'}</div>
+          <div class="data-sub">${formatPrice(o.totalAmount)} · ${new Date(o.createdAt).toLocaleDateString('vi-VN')}</div>
+        </div>
+        <span class="data-badge badge-${o.orderStatus}">${STATUS_LABELS[o.orderStatus]}</span>
+      </div>
+    `).join('') || '<div style="color:var(--text-faint);font-size:13px">Chưa có đơn hàng</div>';
+
+  } catch (err) {
+    document.getElementById('statsGrid').innerHTML = `<div style="color:#FF6B6B;font-size:13px;grid-column:1/-1;text-align:center;padding:20px">${err.message}</div>`;
+  }
+}
+
+let userSearchTimeout;
+function searchUsers() {
+  clearTimeout(userSearchTimeout);
+  userSearchTimeout = setTimeout(loadUsers, 400);
+}
+
+async function loadUsers() {
+  const search = document.getElementById('userSearch')?.value || '';
+  try {
+    const data = await apiRequest(`/users?search=${encodeURIComponent(search)}&limit=30`, { auth: true });
+    document.getElementById('usersList').innerHTML = data.users.length ? data.users.map(u => `
+      <div class="data-row">
+        <div class="data-avatar">👤</div>
+        <div class="data-info">
+          <div class="data-name">@${u.username} · ${u.fullName || ''}</div>
+          <div class="data-sub">${u.email} · ${new Date(u.createdAt).toLocaleDateString('vi-VN')}</div>
+        </div>
+        <span class="data-badge badge-${u.role}">${u.role}</span>
+        <button class="action-btn-sm btn-danger" onclick="deleteUser('${u.id}','${u.username}')">🗑</button>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Không tìm thấy</div>';
+  } catch (err) {
+    document.getElementById('usersList').innerHTML = `<div style="color:#FF6B6B;font-size:13px">${err.message}</div>`;
+  }
+}
+
+async function deleteUser(id, username) {
+  if (!confirm(`Xóa người dùng @${username}? Hành động này không thể hoàn tác.`)) return;
+  try {
+    await apiRequest(`/users/${id}`, { method: 'DELETE', auth: true });
+    toast(`Đã xóa @${username}`, 'accent');
+    loadUsers();
+  } catch (err) { toast(err.message, 'accent'); }
+}
+
+async function loadAdminPosts() {
+  try {
+    const data = await apiRequest('/posts?limit=20', { auth: true });
+    document.getElementById('postsList').innerHTML = data.posts.length ? data.posts.map(p => `
+      <div class="post-admin-item">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;font-weight:600">@${p.author?.username || '—'}</span>
+          <button class="delete-post-btn" onclick="deletePost('${p._id}')">🗑 Xóa</button>
+        </div>
+        <div class="post-admin-text">${p.content || '(Ảnh/media)'}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:6px">❤️ ${p.likes?.length||0} · 💬 ${p.comments?.length||0} · ${new Date(p.createdAt).toLocaleDateString('vi-VN')}</div>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Chưa có bài viết</div>';
+  } catch (err) {
+    document.getElementById('postsList').innerHTML = `<div style="color:#FF6B6B;font-size:13px">${err.message}</div>`;
+  }
+}
+
+async function deletePost(id) {
+  if (!confirm('Xóa bài viết này?')) return;
+  try {
+    await apiRequest(`/posts/${id}`, { method: 'DELETE', auth: true });
+    toast('Đã xóa bài viết', 'accent');
+    loadAdminPosts();
+  } catch (err) { toast(err.message, 'accent'); }
+}
+
+async function loadAdminProducts() {
+  try {
+    const data = await apiRequest('/products?limit=20', { auth: true });
+    document.getElementById('productsList').innerHTML = data.products.length ? data.products.map(p => `
+      <div class="data-row">
+        <div class="data-avatar">🛍️</div>
+        <div class="data-info">
+          <div class="data-name">${p.name}</div>
+          <div class="data-sub">${formatPrice(p.price)} · Kho: ${p.stock} · @${p.seller?.username||'—'}</div>
+        </div>
+        <button class="action-btn-sm btn-danger" onclick="deleteProduct('${p._id}')">🗑</button>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Chưa có sản phẩm</div>';
+  } catch (err) {
+    document.getElementById('productsList').innerHTML = `<div style="color:#FF6B6B;font-size:13px">${err.message}</div>`;
+  }
+}
+
+async function deleteProduct(id) {
+  if (!confirm('Xóa sản phẩm này?')) return;
+  try {
+    await apiRequest(`/products/${id}`, { method: 'DELETE', auth: true });
+    toast('Đã xóa sản phẩm', 'accent');
+    loadAdminProducts();
+  } catch (err) { toast(err.message, 'accent'); }
+}
+
+async function loadOrders(status) {
+  try {
+    const url = status ? `/orders?status=${status}&limit=30` : '/orders?limit=30';
+    const data = await apiRequest(url, { auth: true });
+    const STATUS_LABELS = { pending:'Chờ', confirmed:'Xác nhận', shipping:'Giao', delivered:'Xong', cancelled:'Hủy' };
+    document.getElementById('ordersList').innerHTML = data.orders.length ? data.orders.map(o => `
+      <div class="data-row" style="cursor:pointer" onclick="window.location='order-detail.html?id=${o._id}'">
+        <div class="data-avatar">📦</div>
+        <div class="data-info">
+          <div class="data-name">#${o._id.slice(-8).toUpperCase()} · @${o.buyer?.username||'—'}</div>
+          <div class="data-sub">${formatPrice(o.totalAmount)} · ${new Date(o.createdAt).toLocaleDateString('vi-VN')}</div>
+        </div>
+        <span class="data-badge badge-${o.orderStatus}">${STATUS_LABELS[o.orderStatus]}</span>
+      </div>
+    `).join('') : '<div style="color:var(--text-faint);font-size:13px;text-align:center;padding:20px">Không có đơn hàng</div>';
+  } catch (err) {
+    document.getElementById('ordersList').innerHTML = `<div style="color:#FF6B6B;font-size:13px">${err.message}</div>`;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  const session = getSession();
+  if (!session || session.user.role !== 'admin') {
+    document.getElementById('authGuard').style.display = 'block';
+    return;
+  }
+  document.getElementById('adminContent').style.display = 'block';
+  loadDashboard();
+});
+</script>
+</body>
+</html>

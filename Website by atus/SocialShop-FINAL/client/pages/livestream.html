@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Livestream</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+/* ═══════════════════════════════════════
+   LIVESTREAM PAGE STYLES
+   ═══════════════════════════════════════ */
+
+.live-page { min-height: 100vh; background: #000; color: #fff; }
+
+/* ── Live video container ── */
+.live-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9/16;
+  max-height: 60vh;
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.live-video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.live-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #0f0f1a, #1a0f2e);
+  gap: 12px;
+}
+
+.live-placeholder-icon { font-size: 56px; }
+.live-placeholder-text { font-size: 15px; color: rgba(255,255,255,0.5); text-align: center; }
+
+/* ── Live badge overlay ── */
+.live-badge {
+  position: absolute; top: 12px; left: 12px;
+  background: #FF416C; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+  padding: 4px 10px; border-radius: 999px;
+  display: flex; align-items: center; gap: 5px;
+  animation: livePulse 1.5s ease infinite;
+  z-index: 10;
+}
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,65,108,0.6); }
+  50% { box-shadow: 0 0 0 8px rgba(255,65,108,0); }
+}
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #fff;
+  animation: blink 1s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.live-viewer-count {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+  color: #fff; font-size: 12px; font-weight: 600;
+  padding: 4px 10px; border-radius: 999px;
+  display: flex; align-items: center; gap: 5px; z-index: 10;
+}
+
+.live-close-btn {
+  position: absolute; bottom: 12px; right: 12px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+  border: none; color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; z-index: 10;
+}
+
+/* ── Host info bar ── */
+.live-host-bar {
+  position: absolute; bottom: 12px; left: 12px; right: 60px;
+  display: flex; align-items: center; gap: 10px; z-index: 10;
+}
+.live-host-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px solid #FF416C; object-fit: cover;
+  background: linear-gradient(135deg, #7C5CFC, #FF6B6B);
+  flex-shrink: 0;
+}
+.live-host-name { font-size: 13px; font-weight: 700; }
+.live-host-title { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 1px; }
+.follow-live-btn {
+  background: #FF416C; color: #fff; border: none;
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  flex-shrink: 0; transition: transform .15s;
+}
+.follow-live-btn:active { transform: scale(0.93); }
+.follow-live-btn.following { background: rgba(255,255,255,0.2); }
+
+/* ── Live list (browse streams) ── */
+.live-section {
+  background: var(--bg, #0B0B12);
+  min-height: 40vh;
+  padding-bottom: 100px;
+}
+
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+.section-header h2 { font-size: 16px; font-weight: 700; margin: 0; }
+
+.live-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 0 16px 16px;
+}
+
+.live-card {
+  border-radius: 14px; overflow: hidden;
+  background: var(--surface, rgba(255,255,255,0.05));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  cursor: pointer; transition: transform .15s;
+}
+.live-card:active { transform: scale(0.97); }
+
+.live-thumb {
+  position: relative;
+  aspect-ratio: 9/14;
+  background: linear-gradient(135deg, #1a0f2e, #0f1a2e);
+  overflow: hidden;
+}
+
+.live-thumb-gradient {
+  position: absolute; inset: 0;
+  opacity: 0.6;
+}
+.lt-1 { background: linear-gradient(135deg,#7C5CFC,#FF6B6B); }
+.lt-2 { background: linear-gradient(135deg,#2EE6A6,#7C5CFC); }
+.lt-3 { background: linear-gradient(135deg,#FFC95C,#FF6B6B); }
+.lt-4 { background: linear-gradient(135deg,#FF416C,#FF4B2B); }
+
+.live-thumb-badge {
+  position: absolute; top: 6px; left: 6px;
+  background: #FF416C; color: #fff;
+  font-size: 9px; font-weight: 800; letter-spacing: .06em;
+  padding: 2px 7px; border-radius: 999px;
+}
+
+.live-thumb-viewers {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,0.5);
+  color: #fff; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 999px;
+  display: flex; align-items: center; gap: 3px;
+}
+
+.live-thumb-avatar {
+  position: absolute; bottom: 8px; left: 8px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid #FF416C;
+  background: linear-gradient(135deg, #7C5CFC, #FF6B6B);
+}
+
+.live-card-info { padding: 8px 10px 10px; }
+.live-card-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live-card-title { font-size: 11px; color: var(--text-dim, #9C9AB8); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── My stream card ── */
+.my-stream-card {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, rgba(124,92,252,0.15), rgba(255,107,107,0.15));
+  border: 1px solid rgba(124,92,252,0.3);
+  border-radius: 16px; padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.my-stream-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #FF416C, #FF4B2B);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+  animation: livePulse 2s ease infinite;
+}
+.my-stream-info { flex: 1; }
+.my-stream-title { font-size: 15px; font-weight: 700; }
+.my-stream-sub { font-size: 12px; color: var(--text-dim, #9C9AB8); margin-top: 3px; }
+.start-live-btn {
+  background: linear-gradient(135deg, #FF416C, #FF4B2B);
+  color: #fff; border: none; padding: 10px 18px;
+  border-radius: 999px; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.start-live-btn:active { transform: scale(0.95); }
+
+/* ── Live chat overlay ── */
+.live-chat-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.9);
+  flex-direction: column;
+}
+.live-chat-overlay.open { display: flex; }
+
+.live-watch-video {
+  width: 100%; aspect-ratio: 9/16; max-height: 55vh;
+  background: #000; position: relative; overflow: hidden;
+}
+
+.live-watch-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 40px; gap: 10px;
+  background: linear-gradient(135deg, #0a0520, #1a0530);
+}
+
+.live-watch-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.live-watch-top { display: flex; align-items: center; justify-content: space-between; }
+
+.live-watch-host { display: flex; align-items: center; gap: 8px; }
+.live-watch-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #7C5CFC, #FF6B6B);
+  border: 2px solid #FF416C;
+}
+.live-watch-name { font-size: 13px; font-weight: 700; color: #fff; }
+.live-watch-viewers { font-size: 11px; color: rgba(255,255,255,0.6); }
+
+.live-watch-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(0,0,0,0.5); border: none; color: #fff;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Floating emojis */
+.live-reactions-wrap { position: absolute; right: 12px; bottom: 60px; pointer-events: none; }
+.float-emoji {
+  position: absolute; bottom: 0; right: 0;
+  font-size: 24px; animation: floatUp 2s ease forwards;
+  pointer-events: none;
+}
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-120px) scale(0.5) rotate(20deg); opacity: 0; }
+}
+
+/* Chat messages */
+.live-messages {
+  flex: 1; overflow-y: auto; padding: 8px 12px;
+  display: flex; flex-direction: column; gap: 6px;
+  scrollbar-width: none;
+}
+.live-msg {
+  display: flex; gap: 6px; align-items: flex-start;
+  animation: fadeInMsg .2s ease;
+}
+@keyframes fadeInMsg { from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;} }
+.live-msg-name { font-size: 12px; font-weight: 700; color: #7C5CFC; }
+.live-msg-text { font-size: 13px; color: rgba(255,255,255,0.9); }
+.live-msg-badge {
+  font-size: 9px; background: #FF416C; color: #fff;
+  padding: 1px 5px; border-radius: 4px; font-weight: 700;
+  align-self: center; flex-shrink: 0;
+}
+
+/* Chat input bar */
+.live-input-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.1);
+}
+.live-input {
+  flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 999px; padding: 9px 14px; font-size: 14px;
+  color: #fff; font-family: inherit; outline: none;
+}
+.live-input::placeholder { color: rgba(255,255,255,0.4); }
+.live-send-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #7C5CFC, #FF6B6B);
+  border: none; color: #fff; font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.live-react-btns { display: flex; gap: 6px; }
+.react-btn { font-size: 22px; background: none; border: none; cursor: pointer; transition: transform .1s; }
+.react-btn:active { transform: scale(0.8); }
+
+/* ── Start my live modal ── */
+.start-live-modal {
+  display: none; position: fixed; inset: 0; z-index: 300;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+  align-items: flex-end; justify-content: center;
+}
+.start-live-modal.open { display: flex; }
+.start-live-sheet {
+  background: var(--bg-soft, #12121C); border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 480px; padding: 20px;
+  animation: sheetUp .3s ease;
+}
+@keyframes sheetUp { from{transform:translateY(100%);} to{transform:none;} }
+.sheet-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 20px; }
+.sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+.preview-camera {
+  width: 100%; aspect-ratio: 9/16; max-height: 40vh;
+  background: #111; border-radius: 16px; overflow: hidden;
+  position: relative; margin-bottom: 16px;
+}
+.preview-video { width: 100%; height: 100%; object-fit: cover; }
+.camera-off-msg {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.5); gap: 8px; font-size: 13px;
+}
+
+.stream-title-input {
+  width: 100%; background: var(--surface, rgba(255,255,255,0.05));
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 12px; padding: 12px 14px; font-size: 14px;
+  color: #fff; font-family: inherit; outline: none; margin-bottom: 16px;
+}
+.stream-title-input:focus { border-color: #7C5CFC; }
+.stream-title-input::placeholder { color: rgba(255,255,255,0.3); }
+
+.camera-controls { display: flex; gap: 10px; margin-bottom: 16px; }
+.ctrl-btn {
+  flex: 1; padding: 11px; border-radius: 12px;
+  background: var(--surface, rgba(255,255,255,0.05));
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background .15s;
+}
+.ctrl-btn.active { background: rgba(124,92,252,0.3); border-color: #7C5CFC; }
+.ctrl-btn:hover { background: rgba(255,255,255,0.1); }
+
+.go-live-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #FF416C, #FF4B2B);
+  color: #fff; border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity .2s, transform .15s;
+}
+.go-live-btn:active { transform: scale(0.97); }
+.go-live-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="app live-page">
+
+  <!-- Top bar -->
+  <header class="topbar" style="background:rgba(0,0,0,0.8);backdrop-filter:blur(12px)">
+    <button class="icon-btn" onclick="history.back()" style="color:#fff">←</button>
+    <span class="logo">🔴 Livestream</span>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <!-- Bắt đầu live của tôi -->
+  <div class="live-section">
+    <div class="my-stream-card">
+      <div class="my-stream-icon">📡</div>
+      <div class="my-stream-info">
+        <div class="my-stream-title">Bắt đầu livestream</div>
+        <div class="my-stream-sub">Chia sẻ khoảnh khắc với mọi người</div>
+      </div>
+      <button class="start-live-btn" onclick="openStartLive()">🎬 Live</button>
+    </div>
+
+    <!-- Đang live -->
+    <div class="section-header">
+      <h2>🔴 Đang phát sóng</h2>
+      <span style="font-size:12px;color:var(--text-faint)" id="liveCount">6 streams</span>
+    </div>
+
+    <div class="live-grid" id="liveGrid">
+      <!-- Sẽ được render bằng JS -->
+    </div>
+
+    <!-- Upcoming -->
+    <div class="section-header" style="margin-top:8px">
+      <h2>📅 Sắp diễn ra</h2>
+    </div>
+    <div style="padding:0 16px 100px" id="upcomingList"></div>
+  </div>
+
+</div>
+
+<!-- Watch live overlay -->
+<div class="live-chat-overlay" id="watchOverlay">
+  <div class="live-watch-video">
+    <div class="live-watch-placeholder" id="watchPlaceholder">
+      <span>📺</span>
+      <span style="font-size:14px;color:rgba(255,255,255,0.5)">Đang kết nối stream...</span>
+    </div>
+    <div class="live-watch-overlay" id="watchOverlayUI">
+      <div class="live-watch-top">
+        <div class="live-watch-host">
+          <div class="live-watch-avatar" id="watchAvatar"></div>
+          <div>
+            <div class="live-watch-name" id="watchHostName">--</div>
+            <div class="live-watch-viewers" id="watchViewers">0 người xem</div>
+          </div>
+        </div>
+        <button class="live-watch-close" onclick="closeWatch()">✕</button>
+      </div>
+      <div>
+        <div class="live-badge" style="position:static;display:inline-flex"><div class="live-dot"></div>LIVE</div>
+      </div>
+    </div>
+    <div class="live-reactions-wrap" id="reactionsWrap"></div>
+  </div>
+
+  <div class="live-messages" id="liveMessages"></div>
+
+  <div class="live-input-bar">
+    <div class="live-react-btns">
+      <button class="react-btn" onclick="sendReaction('❤️')">❤️</button>
+      <button class="react-btn" onclick="sendReaction('🔥')">🔥</button>
+      <button class="react-btn" onclick="sendReaction('👏')">👏</button>
+    </div>
+    <input class="live-input" id="liveInput" placeholder="Nhắn tin..." onkeydown="if(event.key==='Enter')sendLiveMsg()">
+    <button class="live-send-btn" onclick="sendLiveMsg()">➤</button>
+  </div>
+</div>
+
+<!-- Start my live modal -->
+<div class="start-live-modal" id="startLiveModal">
+  <div class="start-live-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🎬 Thiết lập livestream</div>
+
+    <div class="preview-camera">
+      <video class="preview-video" id="previewVideo" autoplay muted playsinline></video>
+      <div class="camera-off-msg" id="cameraOffMsg">
+        <span style="font-size:36px">📷</span>
+        <span>Nhấn "Bật camera" để xem trước</span>
+      </div>
+    </div>
+
+    <input class="stream-title-input" id="streamTitleInput" placeholder="Tiêu đề livestream của bạn...">
+
+    <div class="camera-controls">
+      <button class="ctrl-btn" id="camToggleBtn" onclick="toggleCamera()">
+        📷 Bật camera
+      </button>
+      <button class="ctrl-btn" id="micToggleBtn" onclick="toggleMic()">
+        🎙️ Bật mic
+      </button>
+    </div>
+
+    <button class="go-live-btn" id="goLiveBtn" onclick="goLive()">
+      🔴 Bắt đầu phát sóng
+    </button>
+
+    <button onclick="closeStartLive()" style="width:100%;margin-top:10px;padding:10px;background:none;border:none;color:var(--text-dim);font-size:14px;cursor:pointer">
+      Hủy
+    </button>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+// ── Demo live streams data ──
+const DEMO_LIVES = [
+  { id:'l1', host:'Minh Anh', title:'Review iPhone 16 Pro Max 🔥', viewers: 1243, tag:'Tech', color:'lt-1' },
+  { id:'l2', host:'Thảo Vy', title:'Outfit of the day 👗 Flash sale', viewers: 876, tag:'Fashion', color:'lt-2' },
+  { id:'l3', host:'Đăng Khoa', title:'Gaming PUBG Mobile — Rank cao nhất', viewers: 3421, tag:'Gaming', color:'lt-3' },
+  { id:'l4', host:'Linh Chi', title:'Nấu ăn: Bún bò Huế thật sự 🍜', viewers: 542, tag:'Food', color:'lt-4' },
+  { id:'l5', host:'Gia Bảo', title:'DJ Set live — Electronic Vibes 🎵', viewers: 2108, tag:'Music', color:'lt-1' },
+  { id:'l6', host:'Phương Anh', title:'Skincare routine ban đêm ✨', viewers: 987, tag:'Beauty', color:'lt-2' },
+];
+
+const UPCOMING = [
+  { host: 'SocialShop Official', title: 'Flash Sale 12.12 — Giảm đến 80%!', time: 'Hôm nay lúc 20:00', emoji: '🛍️' },
+  { host: 'Tech Review VN', title: 'Unbox Galaxy S25 Ultra', time: 'Ngày mai lúc 19:30', emoji: '📱' },
+];
+
+// ── Render live grid ──
+function renderLiveGrid() {
+  const grid = document.getElementById('liveGrid');
+  grid.innerHTML = DEMO_LIVES.map(s => `
+    <div class="live-card" onclick="watchLive('${s.id}','${s.host}','${s.title}',${s.viewers})">
+      <div class="live-thumb">
+        <div class="live-thumb-gradient ${s.color}"></div>
+        <span class="live-thumb-badge">🔴 LIVE</span>
+        <span class="live-thumb-viewers">👁 ${formatViewers(s.viewers)}</span>
+        <div class="live-thumb-avatar"></div>
+        <div style="position:absolute;bottom:8px;left:50px;right:8px;font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.tag}</div>
+      </div>
+      <div class="live-card-info">
+        <div class="live-card-name">@${s.host}</div>
+        <div class="live-card-title">${s.title}</div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('liveCount').textContent = `${DEMO_LIVES.length} streams`;
+
+  // Upcoming
+  document.getElementById('upcomingList').innerHTML = UPCOMING.map(u => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:14px;margin-bottom:8px;border:1px solid var(--border)">
+      <span style="font-size:28px">${u.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">${u.title}</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:3px">@${u.host} · ${u.time}</div>
+      </div>
+      <button style="background:rgba(124,92,252,0.2);border:1px solid #7C5CFC;color:#7C5CFC;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap" onclick="event.stopPropagation();toast('Đã nhắc nhở lịch stream!','success')">
+        🔔 Nhắc
+      </button>
+    </div>
+  `).join('');
+}
+
+function formatViewers(n) {
+  return n >= 1000 ? (n/1000).toFixed(1).replace('.0','') + 'k' : n.toString();
+}
+
+// ── Watch live ──
+let currentStream = null;
+let viewerInterval = null;
+let msgInterval = null;
+
+const DEMO_MSGS = [
+  { user: 'Minh Tùng', text: '🔥 Stream quá hay!', host: false },
+  { user: 'Lan Anh', text: 'Cho mình hỏi giá sản phẩm?', host: false },
+  { user: 'Khoa Dev', text: '❤️❤️❤️', host: false },
+  { user: 'Host', text: 'Chào mọi người! Flash sale trong 5 phút nữa 🎁', host: true },
+  { user: 'Thu Hà', text: 'Mình order rồi nha ✅', host: false },
+  { user: 'Bảo Trân', text: 'Share cho bạn bè đi mọi người', host: false },
+];
+let msgIndex = 0;
+
+function watchLive(id, host, title, viewers) {
+  currentStream = { id, host, title, viewers };
+  document.getElementById('watchHostName').textContent = host;
+  document.getElementById('watchViewers').textContent = `${formatViewers(viewers)} người xem`;
+  document.getElementById('liveMessages').innerHTML = '';
+  document.getElementById('watchOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Auto messages
+  msgIndex = 0;
+  msgInterval = setInterval(addDemoMsg, 1800);
+
+  // Viewer count fluctuation
+  let v = viewers;
+  viewerInterval = setInterval(() => {
+    v += Math.floor(Math.random() * 10) - 3;
+    document.getElementById('watchViewers').textContent = `${formatViewers(v)} người xem`;
+  }, 3000);
+
+  // Initial messages
+  setTimeout(addDemoMsg, 500);
+  setTimeout(addDemoMsg, 1200);
+}
+
+function addDemoMsg() {
+  const msg = DEMO_MSGS[msgIndex % DEMO_MSGS.length];
+  msgIndex++;
+  const container = document.getElementById('liveMessages');
+  const el = document.createElement('div');
+  el.className = 'live-msg';
+  el.innerHTML = `
+    ${msg.host ? '<span class="live-msg-badge">HOST</span>' : ''}
+    <div>
+      <span class="live-msg-name">${msg.user}: </span>
+      <span class="live-msg-text">${msg.text}</span>
+    </div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+
+  // Keep max 50 messages
+  while (container.children.length > 50) container.removeChild(container.firstChild);
+}
+
+function closeWatch() {
+  document.getElementById('watchOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  clearInterval(viewerInterval);
+  clearInterval(msgInterval);
+}
+
+function sendLiveMsg() {
+  const input = document.getElementById('liveInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const session = getSession();
+  const user = session?.user?.username || 'Bạn';
+
+  const container = document.getElementById('liveMessages');
+  const el = document.createElement('div');
+  el.className = 'live-msg';
+  el.innerHTML = `<div><span class="live-msg-name" style="color:#2EE6A6">${user}: </span><span class="live-msg-text">${text}</span></div>`;
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  input.value = '';
+}
+
+function sendReaction(emoji) {
+  const wrap = document.getElementById('reactionsWrap');
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.style.right = Math.random() * 40 + 'px';
+  el.textContent = emoji;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+// ── Start my live ──
+let cameraStream = null;
+let cameraOn = false;
+let micOn = false;
+
+function openStartLive() {
+  const session = getSession();
+  if (!session) {
+    toast('Vui lòng đăng nhập để phát sóng', 'accent');
+    setTimeout(() => window.location.href = 'login.html', 800);
+    return;
+  }
+  document.getElementById('startLiveModal').classList.add('open');
+}
+
+function closeStartLive() {
+  document.getElementById('startLiveModal').classList.remove('open');
+  stopCameraPreview();
+}
+
+async function toggleCamera() {
+  const btn = document.getElementById('camToggleBtn');
+  const video = document.getElementById('previewVideo');
+  const msg = document.getElementById('cameraOffMsg');
+
+  if (!cameraOn) {
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: micOn });
+      video.srcObject = cameraStream;
+      msg.style.display = 'none';
+      cameraOn = true;
+      btn.classList.add('active');
+      btn.innerHTML = '📷 Tắt camera';
+      toast('Camera đã bật', 'success');
+    } catch {
+      toast('Không thể truy cập camera. Kiểm tra quyền truy cập.', 'accent');
+    }
+  } else {
+    stopCameraPreview();
+    msg.style.display = 'flex';
+    cameraOn = false;
+    btn.classList.remove('active');
+    btn.innerHTML = '📷 Bật camera';
+  }
+}
+
+function toggleMic() {
+  const btn = document.getElementById('micToggleBtn');
+  micOn = !micOn;
+  btn.classList.toggle('active', micOn);
+  btn.innerHTML = micOn ? '🎙️ Tắt mic' : '🎙️ Bật mic';
+  toast(micOn ? 'Mic đã bật' : 'Mic đã tắt', micOn ? 'success' : 'accent');
+}
+
+function stopCameraPreview() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  const video = document.getElementById('previewVideo');
+  video.srcObject = null;
+}
+
+function goLive() {
+  const title = document.getElementById('streamTitleInput').value.trim();
+  if (!title) {
+    toast('Vui lòng nhập tiêu đề livestream', 'accent');
+    document.getElementById('streamTitleInput').focus();
+    return;
+  }
+  const btn = document.getElementById('goLiveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Đang kết nối...';
+
+  // Simulate going live
+  setTimeout(() => {
+    closeStartLive();
+    btn.disabled = false;
+    btn.innerHTML = '🔴 Bắt đầu phát sóng';
+    toast('🔴 Bạn đang phát sóng! Mọi người có thể xem stream của bạn.', 'success');
+    // Add my stream to grid
+    DEMO_LIVES.unshift({ id:'my', host: getSession()?.user?.username || 'Bạn', title, viewers: 0, tag:'Live', color:'lt-4' });
+    renderLiveGrid();
+  }, 2000);
+}
+
+// ── Init ──
+window.addEventListener('DOMContentLoaded', () => {
+  renderLiveGrid();
+  markActiveNav();
+  renderFooterDayCount();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Chi tiết đơn hàng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.order-success { text-align:center; padding:28px 20px 20px; }
+.order-icon { font-size:56px; margin-bottom:12px; }
+.order-id { font-family:var(--font-mono); font-size:13px; color:var(--text-faint); margin-top:6px; }
+
+.status-track { display:flex; justify-content:space-between; align-items:center; padding:16px; margin:0 16px 4px; background:var(--surface); border-radius:14px; }
+.step { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.step-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; background:var(--surface-strong); color:var(--text-faint); }
+.step-icon.done { background:var(--grad); color:#fff; }
+.step-icon.active { background:rgba(124,92,252,.2); border:2px solid var(--primary); color:var(--primary); }
+.step-label { font-size:10px; color:var(--text-faint); text-align:center; }
+.step-line { flex:1; height:2px; background:var(--border); margin:0 4px; margin-bottom:18px; }
+.step-line.done { background:var(--primary); }
+
+.info-card { margin:0 16px 10px; padding:14px; background:var(--surface); border-radius:14px; }
+.info-title { font-size:13px; font-weight:700; margin-bottom:10px; color:var(--text-dim); }
+.info-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+.info-val { color:var(--text); font-weight:500; text-align:right; max-width:60%; }
+
+.order-items { margin:0 16px 10px; }
+.oi-title { font-size:13px; font-weight:700; margin-bottom:8px; color:var(--text-dim); }
+.oi-item { display:flex; gap:10px; background:var(--surface); border-radius:12px; padding:10px; margin-bottom:6px; }
+.oi-img { width:50px; height:50px; border-radius:8px; background:var(--surface-strong); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; overflow:hidden; }
+.oi-img img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+.oi-name { font-size:13px; font-weight:600; }
+.oi-meta { font-size:12px; color:var(--text-faint); margin-top:3px; }
+.oi-price { font-family:var(--font-mono); font-size:13px; color:var(--accent); margin-left:auto; align-self:center; }
+
+.cancel-btn { margin:0 16px 20px; width:calc(100% - 32px); padding:12px; background:transparent; border:1px solid #FF6B6B; color:#FF6B6B; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; }
+.cancel-btn:disabled { opacity:.4; }
+
+.status-badge { display:inline-block; padding:4px 12px; border-radius:999px; font-size:12px; font-weight:600; }
+.s-pending { background:rgba(255,201,92,.15); color:#FFC95C; }
+.s-confirmed { background:rgba(46,230,166,.15); color:#2EE6A6; }
+.s-shipping { background:rgba(124,92,252,.15); color:#7C5CFC; }
+.s-delivered { background:rgba(46,230,166,.2); color:#2EE6A6; }
+.s-cancelled { background:rgba(255,107,107,.15); color:#FF6B6B; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="icon-btn" onclick="history.back()">←</button>
+    <span class="logo" style="font-size:15px">Chi tiết đơn hàng</span>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <div id="orderContent" style="padding-bottom:30px">
+    <div style="text-align:center;padding:40px;color:var(--text-faint)">Đang tải...</div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const orderId = params.get('id');
+
+const STATUS_STEPS = ['pending','confirmed','shipping','delivered'];
+const STATUS_ICONS = { pending:'⏳', confirmed:'✅', shipping:'🚚', delivered:'🎉', cancelled:'❌' };
+const STATUS_LABELS = { pending:'Chờ xác nhận', confirmed:'Đã xác nhận', shipping:'Đang giao', delivered:'Đã nhận', cancelled:'Đã hủy' };
+const PAYMENT_LABELS = { cod:'Tiền mặt (COD)', bank_transfer:'Chuyển khoản', momo:'MoMo', vnpay:'VNPay' };
+
+function formatPrice(n) { return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n); }
+
+async function loadOrder() {
+  if (!orderId) { document.getElementById('orderContent').innerHTML = '<div style="text-align:center;padding:40px">Không tìm thấy đơn hàng</div>'; return; }
+  try {
+    const data = await apiRequest(`/orders/${orderId}`, { auth: true });
+    renderOrder(data.order);
+  } catch (err) {
+    document.getElementById('orderContent').innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-faint)">${err.message}</div>`;
+  }
+}
+
+function renderOrder(order) {
+  const isDelivered = order.orderStatus === 'delivered';
+  const isCancelled = order.orderStatus === 'cancelled';
+  const stepIdx = STATUS_STEPS.indexOf(order.orderStatus);
+
+  let stepsHtml = '';
+  STATUS_STEPS.forEach((s, i) => {
+    if (i > 0) stepsHtml += `<div class="step-line ${i <= stepIdx && !isCancelled ? 'done' : ''}"></div>`;
+    const isDone = i < stepIdx && !isCancelled;
+    const isActive = i === stepIdx && !isCancelled;
+    stepsHtml += `<div class="step"><div class="step-icon ${isDone?'done':isActive?'active':''}">${STATUS_ICONS[s]}</div><div class="step-label">${STATUS_LABELS[s]}</div></div>`;
+  });
+
+  const itemsHtml = order.items.map(item => `
+    <div class="oi-item">
+      <div class="oi-img">${item.image ? `<img src="${item.image}" alt="">` : '📦'}</div>
+      <div>
+        <div class="oi-name">${item.name}</div>
+        <div class="oi-meta">x${item.quantity} · ${formatPrice(item.price)}</div>
+      </div>
+      <div class="oi-price">${formatPrice(item.price * item.quantity)}</div>
+    </div>
+  `).join('');
+
+  const statusClass = `s-${order.orderStatus}`;
+
+  document.getElementById('orderContent').innerHTML = `
+    <div class="order-success">
+      <div class="order-icon">${isCancelled ? '❌' : isDelivered ? '🎉' : '📦'}</div>
+      <div style="font-size:17px;font-weight:700">${isCancelled ? 'Đơn hàng đã hủy' : isDelivered ? 'Giao hàng thành công!' : 'Đơn hàng đang xử lý'}</div>
+      <div class="order-id">#${order._id.slice(-10).toUpperCase()}</div>
+      <div style="margin-top:10px"><span class="status-badge ${statusClass}">${STATUS_LABELS[order.orderStatus]}</span></div>
+    </div>
+
+    ${!isCancelled ? `<div class="status-track">${stepsHtml}</div>` : ''}
+
+    <div class="info-card">
+      <div class="info-title">📦 Thông tin giao hàng</div>
+      <div class="info-row"><span>Người nhận</span><span class="info-val">${order.shippingAddress?.fullName || '—'}</span></div>
+      <div class="info-row"><span>Điện thoại</span><span class="info-val">${order.shippingAddress?.phone || '—'}</span></div>
+      <div class="info-row"><span>Địa chỉ</span><span class="info-val">${order.shippingAddress?.address || '—'}${order.shippingAddress?.city ? ', ' + order.shippingAddress.city : ''}</span></div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-title">💳 Thanh toán</div>
+      <div class="info-row"><span>Phương thức</span><span class="info-val">${PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}</span></div>
+      <div class="info-row"><span>Trạng thái</span><span class="info-val">${order.paymentStatus === 'paid' ? '✅ Đã thanh toán' : '⏳ Chờ thanh toán'}</span></div>
+      <div class="info-row"><span>Tổng tiền</span><span class="info-val" style="color:var(--accent);font-family:var(--font-mono)">${formatPrice(order.totalAmount)}</span></div>
+    </div>
+
+    <div class="order-items">
+      <div class="oi-title">🛍️ Sản phẩm (${order.items.length})</div>
+      ${itemsHtml}
+    </div>
+
+    ${order.note ? `<div class="info-card"><div class="info-title">📝 Ghi chú</div><div style="font-size:13px;color:var(--text-dim)">${order.note}</div></div>` : ''}
+
+    ${order.orderStatus === 'pending' ? `<button class="cancel-btn" onclick="cancelOrder('${order._id}')">Hủy đơn hàng</button>` : ''}
+    
+    <div style="text-align:center;padding:10px 0 4px">
+      <a href="marketplace.html" style="color:var(--primary);font-size:14px">← Tiếp tục mua sắm</a>
+    </div>
+  `;
+}
+
+async function cancelOrder(id) {
+  if (!confirm('Bạn có chắc muốn hủy đơn hàng này không?')) return;
+  try {
+    await apiRequest(`/orders/${id}/cancel`, { method: 'PUT', auth: true });
+    toast('Đã hủy đơn hàng', 'accent');
+    loadOrder();
+  } catch (err) { toast(err.message, 'accent'); }
+}
+
+window.addEventListener('DOMContentLoaded', loadOrder);
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Đăng ký</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app">
+  <div class="auth-wrap">
+
+    <div class="auth-hero">
+      <div class="logo">SocialShop</div>
+      <p>Tạo tài khoản mới — chỉ mất 30 giây.</p>
+    </div>
+
+    <form class="auth-card" id="registerForm" onsubmit="event.preventDefault(); handleRegister(this);">
+      <div class="field">
+        <label for="regFullName">Họ và tên</label>
+        <input id="regFullName" name="fullName" type="text" placeholder="Nguyễn Văn A">
+      </div>
+      <div class="field">
+        <label for="regUsername">Username</label>
+        <input id="regUsername" name="username" type="text" placeholder="vd: minhanh99" required minlength="3">
+      </div>
+      <div class="field">
+        <label for="regEmail">Email</label>
+        <input id="regEmail" name="email" type="email" placeholder="ban@email.com" required>
+      </div>
+      <div class="field">
+        <label for="regPassword">Mật khẩu</label>
+        <input id="regPassword" name="password" type="password" placeholder="Ít nhất 6 ký tự" required minlength="6">
+      </div>
+      <button type="submit" class="btn-primary">Tạo tài khoản</button>
+      <div class="auth-switch">Đã có tài khoản? <a href="login.html">Đăng nhập</a></div>
+    </form>
+
+    <p class="auth-note">
+      Cần backend đang chạy ở <span class="mono">localhost:5000</span>. Nếu chưa chạy server, đăng ký sẽ báo lỗi mạng.
+    </p>
+
+  </div>
+
+  <div class="site-footer standalone">
+    <div class="line1">Website bởi Lê Anh Tú</div>
+    <div class="line2" id="footerDayCount">Đang tính ngày xây dựng...</div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>

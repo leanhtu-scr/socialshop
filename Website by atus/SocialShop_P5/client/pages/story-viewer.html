@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:#000;font-family:'Inter',system-ui,sans-serif;color:#fff;}
+button{border:none;background:none;color:inherit;cursor:pointer;font-family:inherit;}
+
+/* ===== STORY VIEWER ===== */
+.sv-root {
+  position:fixed; inset:0; display:flex; flex-direction:column;
+  background:#000; touch-action:none;
+}
+
+/* Progress bars */
+.sv-progress {
+  display:flex; gap:4px; padding:12px 12px 8px;
+  position:absolute; top:0; left:0; right:0; z-index:10;
+}
+.sv-prog-bar {
+  flex:1; height:2px; border-radius:1px;
+  background:rgba(255,255,255,0.3); overflow:hidden;
+}
+.sv-prog-fill {
+  height:100%; width:0%; background:#fff;
+  border-radius:1px; transition:width linear;
+}
+.sv-prog-bar.done .sv-prog-fill { width:100%; }
+.sv-prog-bar.active .sv-prog-fill { animation: fillBar 5s linear forwards; }
+@keyframes fillBar { from{width:0%} to{width:100%} }
+
+/* Header */
+.sv-header {
+  position:absolute; top:22px; left:0; right:0; z-index:10;
+  display:flex; align-items:center; gap:10px; padding:0 12px;
+}
+.sv-avatar {
+  width:36px; height:36px; border-radius:50%;
+  border:2px solid #fff; background:linear-gradient(135deg,#7C5CFC,#FF6B6B);
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  flex-shrink:0;
+}
+.sv-user { flex:1; }
+.sv-username { font-size:14px; font-weight:700; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+.sv-time { font-size:12px; opacity:.7; }
+.sv-close {
+  width:36px; height:36px; border-radius:50%;
+  background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+
+/* Slide area */
+.sv-slide {
+  position:relative; flex:1; display:flex;
+  align-items:center; justify-content:center; overflow:hidden;
+}
+.sv-media {
+  position:absolute; inset:0;
+}
+.sv-media img, .sv-media video {
+  width:100%; height:100%; object-fit:cover;
+}
+/* Text story */
+.sv-text-story {
+  position:absolute; inset:0; display:flex; align-items:center;
+  justify-content:center; padding:40px 24px; text-align:center;
+}
+.sv-text-content {
+  font-size:22px; font-weight:700; line-height:1.4;
+  text-shadow:0 2px 8px rgba(0,0,0,.6);
+}
+/* Gradient overlay */
+.sv-overlay-top {
+  position:absolute; top:0; left:0; right:0; height:180px;
+  background:linear-gradient(to bottom, rgba(0,0,0,.7) 0%, transparent 100%);
+  pointer-events:none;
+}
+.sv-overlay-bottom {
+  position:absolute; bottom:0; left:0; right:0; height:200px;
+  background:linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 100%);
+  pointer-events:none;
+}
+
+/* Touch zones */
+.sv-touch-prev, .sv-touch-next {
+  position:absolute; top:0; bottom:0; width:35%; z-index:5;
+}
+.sv-touch-prev { left:0; }
+.sv-touch-next { right:0; }
+
+/* Sticker / caption */
+.sv-caption {
+  position:absolute; bottom:80px; left:0; right:0;
+  padding:0 20px; text-align:center; z-index:6;
+}
+.sv-caption-text {
+  display:inline-block; background:rgba(0,0,0,.5); backdrop-filter:blur(6px);
+  padding:8px 16px; border-radius:12px; font-size:14px; line-height:1.5;
+}
+.sv-caption-link {
+  display:inline-block; background:rgba(255,255,255,.15); backdrop-filter:blur(6px);
+  padding:8px 20px; border-radius:999px; font-size:13px; font-weight:600;
+  border:1px solid rgba(255,255,255,.3); margin-top:8px; cursor:pointer;
+}
+
+/* Footer */
+.sv-footer {
+  position:absolute; bottom:0; left:0; right:0; z-index:10;
+  padding:12px 12px calc(16px + env(safe-area-inset-bottom));
+}
+.sv-reply-wrap {
+  display:flex; gap:8px; align-items:center;
+}
+.sv-reply-input {
+  flex:1; padding:10px 16px;
+  background:rgba(255,255,255,.12); backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.25); border-radius:999px;
+  color:#fff; font-size:14px; outline:none;
+}
+.sv-reply-input::placeholder { color:rgba(255,255,255,.5); }
+.sv-reply-btn {
+  width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+}
+.sv-reactions { display:flex; gap:12px; justify-content:center; margin-top:8px; }
+.sv-react-btn { font-size:24px; transition:transform .15s; }
+.sv-react-btn:active { transform:scale(1.4); }
+
+/* Story list (horizontal) at top */
+.sv-story-list {
+  position:absolute; top:-60px; left:0; right:0;
+  display:flex; gap:8px; padding:0 12px;
+  overflow-x:auto; scrollbar-width:none; z-index:20;
+  transition:top .3s ease;
+}
+.sv-story-list.open { top:8px; }
+
+/* Pause indicator */
+.sv-paused-indicator {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:56px; height:56px; border-radius:50%;
+  background:rgba(0,0,0,.5); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; opacity:0; transition:opacity .2s; pointer-events:none;
+}
+.sv-paused-indicator.show { opacity:1; }
+</style>
+</head>
+<body>
+<div class="sv-root" id="svRoot">
+
+  <!-- Progress bars -->
+  <div class="sv-progress" id="svProgress"></div>
+
+  <!-- Header -->
+  <div class="sv-header">
+    <div class="sv-avatar" id="svAvatar"></div>
+    <div class="sv-user">
+      <div class="sv-username" id="svUsername">...</div>
+      <div class="sv-time" id="svTime">vừa xong</div>
+    </div>
+    <button class="sv-close" onclick="closeStory()">✕</button>
+  </div>
+
+  <!-- Slide -->
+  <div class="sv-slide" id="svSlide">
+    <div class="sv-overlay-top"></div>
+    <div class="sv-overlay-bottom"></div>
+    <div class="sv-media" id="svMedia"></div>
+    <!-- Touch zones -->
+    <div class="sv-touch-prev" ontouchstart="handleTouchStart(event)" onmousedown="startPress()" onmouseup="endPress()" onclick="prevSlide()"></div>
+    <div class="sv-touch-next" ontouchstart="handleTouchStart(event)" onmousedown="startPress()" onmouseup="endPress()" onclick="nextSlide()"></div>
+    <div class="sv-paused-indicator" id="pauseIndicator">⏸</div>
+  </div>
+
+  <!-- Caption -->
+  <div class="sv-caption" id="svCaption" style="display:none">
+    <div class="sv-caption-text" id="svCaptionText"></div>
+    <div class="sv-caption-link" id="svCaptionLink" style="display:none" onclick="handleCaptionLink()">👆 Xem thêm</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="sv-footer">
+    <div class="sv-reply-wrap">
+      <input class="sv-reply-input" id="replyInput" placeholder="Trả lời..." onfocus="pauseStory()" onblur="resumeStory()">
+      <button class="sv-reply-btn" onclick="sendReply()">📤</button>
+      <button class="sv-reply-btn" onclick="shareStory()">🔗</button>
+    </div>
+    <div class="sv-reactions">
+      <button class="sv-react-btn" onclick="reactStory('❤️')">❤️</button>
+      <button class="sv-react-btn" onclick="reactStory('😮')">😮</button>
+      <button class="sv-react-btn" onclick="reactStory('😂')">😂</button>
+      <button class="sv-react-btn" onclick="reactStory('🔥')">🔥</button>
+      <button class="sv-react-btn" onclick="reactStory('👏')">👏</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="../js/config.js"></script>
+<script>
+// ---- Story data ----
+// Loaded from URL param: ?userId=xxx or demo data
+const params = new URLSearchParams(location.search);
+const userId = params.get('userId') || 'demo';
+const fromPage = params.get('from') || '../index.html';
+
+let stories = [];
+let currentIdx = 0;
+let isPaused = false;
+let animTimer = null;
+let pressTimer = null;
+let swipeStartX = 0;
+
+const STORY_DURATION = 5000; // ms
+
+// Demo stories
+const demoStories = [
+  {
+    id:'s1', userId:'demo', username:'Minh Anh', type:'image',
+    bg:'linear-gradient(135deg,#1a0533,#4a0080)',
+    color:'#FFD700', text:'Hôm nay trời đẹp quá! ☀️',
+    caption:'Đi café với bạn bè 🍵', time: new Date(Date.now()-3600000)
+  },
+  {
+    id:'s2', userId:'demo', username:'Minh Anh', type:'text',
+    bg:'linear-gradient(135deg,#0B0B3B,#1A1A6B)',
+    color:'#00FFFF', text:'✨ Flash Sale hôm nay!\n50% toàn bộ sản phẩm\nChỉ còn 2 giờ!',
+    caption:'', link:'marketplace.html', linkText:'🛍️ Mua ngay', time: new Date(Date.now()-1800000)
+  },
+  {
+    id:'s3', userId:'demo', username:'Minh Anh', type:'text',
+    bg:'linear-gradient(135deg,#1C0B00,#4A1500)',
+    color:'#FF6B6B', text:'Giao hàng nhanh 24h\n🚀 Khắp toàn quốc',
+    caption:'Xem sản phẩm mới nhất nhé!', time: new Date(Date.now()-900000)
+  },
+];
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadStories();
+  renderProgress();
+  showStory(0);
+});
+
+async function loadStories() {
+  if (userId === 'demo') { stories = demoStories; return; }
+  try {
+    const res = await fetch(`${window.API_BASE||'http://localhost:5000/api'}/users/${userId}/stories`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    stories = data.stories || demoStories;
+  } catch {
+    stories = demoStories;
+  }
+}
+
+// ---- Render ----
+function renderProgress() {
+  const el = document.getElementById('svProgress');
+  el.innerHTML = stories.map((_,i) =>
+    `<div class="sv-prog-bar" id="pb${i}"><div class="sv-prog-fill"></div></div>`
+  ).join('');
+}
+
+function showStory(idx) {
+  if (idx < 0 || idx >= stories.length) { closeStory(); return; }
+  currentIdx = idx;
+  const s = stories[idx];
+
+  // Header
+  document.getElementById('svAvatar').textContent = (s.username||'?')[0].toUpperCase();
+  document.getElementById('svUsername').textContent = s.username;
+  document.getElementById('svTime').textContent = formatTime(s.time);
+
+  // Media
+  const media = document.getElementById('svMedia');
+  if (s.type === 'image' && s.url) {
+    media.innerHTML = `<img src="${s.url}" alt="story">`;
+  } else {
+    media.innerHTML = `
+      <div class="sv-text-story" style="background:${s.bg||'#111'}">
+        <div class="sv-text-content" style="color:${s.color||'#fff'}">${(s.text||'').replace(/\n/g,'<br>')}</div>
+      </div>`;
+  }
+
+  // Caption
+  const cap = document.getElementById('svCaption');
+  const capText = document.getElementById('svCaptionText');
+  const capLink = document.getElementById('svCaptionLink');
+  if (s.caption) {
+    cap.style.display='block';
+    capText.textContent = s.caption;
+    capLink.style.display = s.link ? 'inline-block' : 'none';
+    if (s.link) capLink.textContent = s.linkText || '👆 Xem thêm';
+  } else {
+    cap.style.display = 'none';
+  }
+
+  // Progress bars
+  document.querySelectorAll('.sv-prog-bar').forEach((b,i) => {
+    b.className = 'sv-prog-bar';
+    b.querySelector('.sv-prog-fill').style.cssText = '';
+    if (i < idx) b.classList.add('done');
+    else if (i === idx) {
+      b.classList.add('active');
+    }
+  });
+
+  // Auto-advance
+  clearTimeout(animTimer);
+  if (!isPaused) {
+    animTimer = setTimeout(() => nextSlide(), STORY_DURATION);
+  }
+}
+
+function nextSlide() {
+  clearTimeout(animTimer);
+  if (currentIdx < stories.length - 1) showStory(currentIdx + 1);
+  else closeStory();
+}
+
+function prevSlide() {
+  clearTimeout(animTimer);
+  if (currentIdx > 0) showStory(currentIdx - 1);
+  else showStory(0); // restart
+}
+
+function pauseStory() {
+  isPaused = true;
+  clearTimeout(animTimer);
+  document.querySelectorAll('.sv-prog-bar.active .sv-prog-fill').forEach(f => {
+    f.style.animationPlayState = 'paused';
+  });
+  document.getElementById('pauseIndicator').classList.add('show');
+}
+
+function resumeStory() {
+  isPaused = false;
+  document.querySelectorAll('.sv-prog-bar.active .sv-prog-fill').forEach(f => {
+    f.style.animationPlayState = 'running';
+  });
+  document.getElementById('pauseIndicator').classList.remove('show');
+  animTimer = setTimeout(() => nextSlide(), STORY_DURATION);
+}
+
+function closeStory() {
+  clearTimeout(animTimer);
+  window.location.href = fromPage;
+}
+
+// Touch handling
+function handleTouchStart(e) {
+  swipeStartX = e.touches[0].clientX;
+  pressTimer = setTimeout(() => pauseStory(), 150);
+}
+
+document.addEventListener('touchend', (e) => {
+  clearTimeout(pressTimer);
+  if (isPaused && document.activeElement.tagName !== 'INPUT') resumeStory();
+  const dx = e.changedTouches?.[0]?.clientX - swipeStartX;
+  if (Math.abs(dx) > 60) {
+    if (dx < 0) nextSlide(); else prevSlide();
+  }
+});
+
+function startPress() { pressTimer = setTimeout(() => pauseStory(), 150); }
+function endPress() { clearTimeout(pressTimer); if (isPaused) resumeStory(); }
+
+function handleCaptionLink() {
+  const s = stories[currentIdx];
+  if (s?.link) window.location.href = s.link;
+}
+
+function reactStory(emoji) {
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);font-size:36px;animation:floatUp 1.2s ease forwards;pointer-events:none;z-index:999`;
+  el.textContent = emoji;
+  document.body.appendChild(el);
+  const style = document.createElement('style');
+  style.textContent = '@keyframes floatUp{0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-80px) scale(1.5)}}';
+  document.head.appendChild(style);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function sendReply() {
+  const val = document.getElementById('replyInput').value.trim();
+  if (!val) return;
+  showToast(`Đã gửi: "${val}"`, 'success');
+  document.getElementById('replyInput').value = '';
+  resumeStory();
+}
+
+function shareStory() { showToast('Đã sao chép liên kết!', 'success'); }
+
+function formatTime(d) {
+  const diff = Date.now() - new Date(d);
+  if (diff < 60000) return 'vừa xong';
+  if (diff < 3600000) return `${Math.floor(diff/60000)} phút trước`;
+  if (diff < 86400000) return `${Math.floor(diff/3600000)} giờ trước`;
+  return new Date(d).toLocaleDateString('vi-VN');
+}
+
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:180px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,.8);backdrop-filter:blur(8px);color:#fff;padding:10px 20px;border-radius:999px;font-size:14px;transition:all .3s;opacity:0;z-index:9999;white-space:nowrap`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; }, 10);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2500);
+}
+</script>
+</body>
+</html>

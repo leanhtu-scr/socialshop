@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Kết quả thanh toán</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.result-wrap {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+  gap: 14px;
+}
+.result-icon { font-size: 80px; line-height: 1; animation: pop .4s ease; }
+@keyframes pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  80%  { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.result-title { font-size: 24px; font-weight: 800; }
+.result-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 320px; }
+.result-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  background: var(--surface);
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+.result-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 8px; }
+.btn-primary {
+  padding: 14px;
+  background: var(--grad);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-ghost {
+  padding: 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="result-wrap" id="resultWrap">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script>
+(function () {
+  const params  = new URLSearchParams(location.search);
+  const success = params.get('success') === '1';
+  const code    = params.get('code') || '';
+  const orderId = params.get('orderId') || '';
+  const provider = (params.get('provider') || 'vnpay').toUpperCase();
+
+  const wrap = document.getElementById('resultWrap');
+
+  const providerMessages = {
+    '07': 'Giao dịch bị nghi ngờ gian lận.',
+    '09': 'Thẻ/tài khoản chưa đăng ký dịch vụ Internet Banking.',
+    '10': 'Xác thực thẻ sai quá 3 lần. Vui lòng thử lại sau 24 giờ.',
+    '11': 'Đã hết thời gian chờ thanh toán.',
+    '12': 'Thẻ/tài khoản bị khóa.',
+    '13': 'Sai mật khẩu OTP. Vui lòng thử lại.',
+    '24': 'Bạn đã hủy giao dịch.',
+    '51': 'Tài khoản không đủ số dư.',
+    '65': 'Vượt hạn mức giao dịch trong ngày.',
+    '75': 'Ngân hàng đang bảo trì. Vui lòng thử lại sau.',
+    '79': 'Nhập sai mật khẩu thanh toán quá số lần cho phép.',
+    '97': 'Chữ ký không hợp lệ. Có thể có lỗi bảo mật.',
+  };
+
+  const errMsg = providerMessages[code] || 'Giao dịch không thành công. Vui lòng thử lại.';
+  const shortId = orderId ? `#${orderId.slice(-6).toUpperCase()}` : '';
+
+  if (success) {
+    wrap.innerHTML = `
+      <div class="result-icon">🎉</div>
+      <h1 class="result-title" style="color:var(--secondary)">Thanh toán thành công!</h1>
+      <p class="result-sub">Đơn hàng <strong>${shortId}</strong> đã được xác nhận. Chúng tôi sẽ xử lý và giao hàng sớm nhất có thể.</p>
+      <div class="result-code">${provider} · Mã GD: ${code || '00'}</div>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="location.href='order-detail.html?id=${orderId}'">Xem đơn hàng</button>
+        <button class="btn-ghost"  onclick="location.href='../index.html'">Về trang chủ</button>
+      </div>
+    `;
+  } else {
+    wrap.innerHTML = `
+      <div class="result-icon">❌</div>
+      <h1 class="result-title" style="color:#FF6B6B">Thanh toán thất bại</h1>
+      <p class="result-sub">${errMsg}</p>
+      <div class="result-code">${provider} · Mã lỗi: ${code}</div>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="history.back()">Thử lại</button>
+        <button class="btn-ghost"  onclick="location.href='../index.html'">Về trang chủ</button>
+      </div>
+    `;
+  }
+})();
+</script>
+</body>
+</html>

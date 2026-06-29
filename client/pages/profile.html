@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Hồ sơ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/social-bar.css">
+<style>
+/* --- Profile specific --- */
+.profile-cover {
+  width:100%; height:160px;
+  background: linear-gradient(135deg,#7C5CFC,#FF6B6B,#2EE6A6);
+  position:relative;
+}
+.profile-cover-edit {
+  position:absolute; top:10px; right:10px;
+  background:rgba(0,0,0,0.4); color:#fff;
+  font-size:12px; padding:5px 12px; border-radius:999px;
+  backdrop-filter:blur(6px); cursor:pointer;
+}
+.profile-avatar-wrap {
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 16px; margin-top:-40px;
+}
+.profile-avatar {
+  width:80px; height:80px; border-radius:50%;
+  background:var(--grad);
+  border:3px solid var(--bg);
+  flex-shrink:0;
+}
+.profile-follow-btn {
+  background:var(--grad); color:#fff;
+  font-size:13px; font-weight:600;
+  padding:9px 22px; border-radius:999px;
+  transition:transform .15s;
+}
+.profile-follow-btn:active{transform:scale(0.96);}
+.profile-info {
+  padding:12px 16px 0;
+}
+.profile-name { font-size:18px; font-weight:700; }
+.profile-handle { font-size:13px; color:var(--text-faint); margin-top:2px; }
+.profile-bio { font-size:13px; color:var(--text-dim); margin-top:8px; line-height:1.5; }
+.profile-stats {
+  display:flex; gap:24px; padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.stat { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.stat-num { font-family:var(--font-mono); font-size:15px; font-weight:700; }
+.stat-label { font-size:11px; color:var(--text-faint); }
+.profile-tabs {
+  display:flex; border-bottom:1px solid var(--border);
+  position:sticky; top:0; background:var(--bg); z-index:10;
+}
+.ptab {
+  flex:1; text-align:center; padding:12px 4px;
+  font-size:13px; font-weight:500; color:var(--text-dim);
+  border-bottom:2px solid transparent; cursor:pointer; transition:all .2s;
+}
+.ptab.active { color:var(--primary); border-bottom-color:var(--primary); }
+.profile-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:2px; padding:2px;
+}
+.pg-item {
+  aspect-ratio:1/1; background:var(--surface-strong);
+  cursor:pointer; overflow:hidden; position:relative;
+}
+.pg-item.grad-a { background:linear-gradient(135deg,#7C5CFC55,#FF6B6B55); }
+.pg-item.grad-b { background:linear-gradient(135deg,#2EE6A655,#7C5CFC55); }
+.pg-item.grad-c { background:linear-gradient(135deg,#FFC95C55,#FF6B6B55); }
+.pg-item.grad-d { background:linear-gradient(135deg,#FF6B6B55,#2EE6A655); }
+
+/* social link bar on profile */
+.profile-social-links {
+  display:flex; gap:10px; padding:12px 16px;
+  overflow-x:auto; scrollbar-width:none;
+}
+.profile-social-links::-webkit-scrollbar{display:none;}
+.psl-chip {
+  display:flex; align-items:center; gap:6px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:999px; padding:6px 14px; flex-shrink:0;
+  font-size:12px; font-weight:500; color:var(--text-dim);
+  text-decoration:none; transition:all .2s;
+}
+.psl-chip svg { width:14px; height:14px; }
+.psl-chip:active { transform:scale(0.95); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <a class="icon-btn" href="../index.html">←</a>
+    <span class="logo" style="font-size:15px;">Hồ sơ</span>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <!-- Cover -->
+  <div class="profile-cover" id="profileCover" style="cursor:pointer" onclick="triggerCoverUpload()" title="Nhấn để đổi ảnh bìa">
+    <button class="profile-cover-edit" onclick="event.stopPropagation();triggerCoverUpload()">📷 Đổi ảnh bìa</button>
+  </div>
+  <input type="file" id="coverInput" accept="image/*" style="display:none" onchange="handleCoverUpload(this)">
+
+  <!-- Avatar + Follow -->
+  <div class="profile-avatar-wrap">
+    <div class="profile-avatar" id="profileAvatarWrap" style="cursor:pointer;position:relative;overflow:visible" onclick="triggerAvatarUpload()" title="Nhấn để đổi avatar">
+      <div id="profileAvatarEl" style="width:100%;height:100%;border-radius:50%;background:var(--grad);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px"></div>
+      <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;background:#7C5CFC;border-radius:50%;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px">📷</div>
+    </div>
+    <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+    <button class="profile-follow-btn" id="followBtn" onclick="toggleFollow(this)">Theo dõi</button>
+  </div>
+
+  <!-- Info -->
+  <div class="profile-info">
+    <div class="profile-name">Lê Anh Tú</div>
+    <div class="profile-handle">@leanhhtu · SocialShop Creator</div>
+    <div class="profile-bio">Lập trình viên độc lập 🛠 · Xây dựng SocialShop từ điện thoại 📱 · Kết hợp mạng xã hội + thương mại điện tử ✨</div>
+  </div>
+
+  <!-- Social links (mini chips) -->
+  <div class="profile-social-links">
+    <a class="psl-chip" href="https://www.threads.net" target="_blank" rel="noopener">
+      <svg viewBox="0 0 192 192" fill="currentColor"><path d="M141.537 88.988a66.667 66.667 0 0 0-2.518-1.143c-1.482-27.307-16.403-42.94-41.457-43.1h-.34c-14.986 0-27.449 6.396-35.12 18.036l13.779 9.452c5.73-8.695 14.724-10.548 21.348-10.548h.229c8.249.053 14.474 2.452 18.503 7.129 2.932 3.405 4.893 8.111 5.864 14.05-7.314-1.243-15.224-1.626-23.68-1.14-23.82 1.371-39.134 15.264-38.105 34.568.522 9.792 5.4 18.216 13.735 23.719 7.047 4.652 16.124 6.927 25.557 6.412 12.458-.683 22.231-5.436 29.05-14.127 5.177-6.6 8.452-15.153 9.879-25.93 5.92 3.577 10.304 8.297 12.786 13.966 4.236 9.69 4.477 25.608-8.362 38.43-11.27 11.26-24.838 16.14-45.32 16.29-22.71-.168-39.894-7.453-51.086-21.674C92.966 150.308 87 132.84 86.775 112h-17.5c.233 25.18 7.712 46.05 21.714 60.44 12.757 13.11 30.355 19.92 52.367 20.227h.2c25.267-.18 44.533-7.553 59.239-22.238 17.994-17.97 17.535-40.38 11.542-54.125-4.136-9.457-12.08-17.123-22.8-22.316Zm-39.727 40.173c-10.426.585-21.258-4.092-21.8-14.127-.4-7.503 5.33-15.876 22.58-16.875 1.974-.114 3.917-.169 5.831-.169 6.151 0 11.92.606 17.233 1.778-1.962 24.25-13.894 28.793-23.844 29.393Z"/></svg>
+      Threads
+    </a>
+    <a class="psl-chip" href="https://www.instagram.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5.5" stroke="url(#ig2)" stroke-width="2"/><circle cx="12" cy="12" r="4.5" stroke="url(#ig2)" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="url(#ig2)"/><defs><linearGradient id="ig2" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse"><stop stop-color="#FFDC80"/><stop offset=".3" stop-color="#F77737"/><stop offset=".65" stop-color="#C13584"/><stop offset="1" stop-color="#833AB4"/></linearGradient></defs></svg>
+      Instagram
+    </a>
+    <a class="psl-chip" href="https://www.facebook.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#1877F2"/><path d="M16 8h-2a1 1 0 0 0-1 1v2h3l-.5 3H13v7h-3v-7H8v-3h2V9a4 4 0 0 1 4-4h2v3Z" fill="white"/></svg>
+      Facebook
+    </a>
+    <a class="psl-chip" href="https://www.tiktok.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="#EE1D52" stroke-width="2" stroke-linecap="round"/></svg>
+      TikTok
+    </a>
+    <a class="psl-chip" href="https://github.com" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/></svg>
+      GitHub
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="profile-stats">
+    <div class="stat"><span class="stat-num">248</span><span class="stat-label">Bài viết</span></div>
+    <div class="stat"><span class="stat-num">12.4k</span><span class="stat-label">Người theo dõi</span></div>
+    <div class="stat"><span class="stat-num">389</span><span class="stat-label">Đang theo dõi</span></div>
+    <div class="stat"><span class="stat-num">56</span><span class="stat-label">Sản phẩm</span></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="profile-tabs">
+    <div class="ptab active" onclick="switchTab(this,'posts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:block;margin:0 auto 2px"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Bài đăng
+    </div>
+    <div class="ptab" onclick="switchTab(this,'shop')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:block;margin:0 auto 2px"><path d="M3 9 4 4h16l1 5M3 9v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M9 13a3 3 0 0 0 6 0"/></svg>
+      Cửa hàng
+    </div>
+    <div class="ptab" onclick="switchTab(this,'saved')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:block;margin:0 auto 2px"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>
+      Đã lưu
+    </div>
+  </div>
+
+  <!-- Post grid -->
+  <div class="profile-grid" id="postGrid">
+    <div class="pg-item grad-a"></div>
+    <div class="pg-item grad-b"></div>
+    <div class="pg-item grad-c"></div>
+    <div class="pg-item grad-d"></div>
+    <div class="pg-item grad-a"></div>
+    <div class="pg-item grad-b"></div>
+    <div class="pg-item grad-c"></div>
+    <div class="pg-item grad-d"></div>
+    <div class="pg-item grad-a"></div>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav">
+    <div class="site-footer">
+      <div class="line1">Website bởi Lê Anh Tú</div>
+      <div class="line2" id="footerDayCount">Đang tính...</div>
+    </div>
+    <div class="nav-row">
+      <a class="nav-item" data-page="index.html" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+        Trang chủ
+      </a>
+      <a class="nav-item" href="marketplace.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4 4h16l1 5M3 9v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M9 13a3 3 0 0 0 6 0"/></svg>
+        Chợ
+      </a>
+      <a class="nav-item center" href="#" onclick="toast('Mở camera tạo bài viết')">
+        <span class="nav-bubble">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        </span>
+      </a>
+      <a class="nav-item" href="#" onclick="toast('Tin nhắn (sắp ra mắt)')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+        Chat
+      </a>
+      <a class="nav-item active" href="profile.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+        Cá nhân
+      </a>
+    </div>
+  </nav>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/upload.js"></script>
+<script>
+function switchTab(el, tab) {
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  toast(`Đang xem: ${tab === 'posts' ? 'Bài đăng' : tab === 'shop' ? 'Cửa hàng' : 'Đã lưu'}`, 'accent');
+}
+function toggleFollow(btn) {
+  const following = btn.textContent.trim() === 'Đang theo dõi';
+  btn.textContent = following ? 'Theo dõi' : 'Đang theo dõi';
+  btn.style.background = following ? 'var(--grad)' : 'var(--surface)';
+  btn.style.color = following ? '#fff' : 'var(--text)';
+  toast(following ? 'Đã bỏ theo dõi' : 'Đã theo dõi', 'success');
+}
+
+// ── Load avatar từ localStorage khi vào trang ─────────────────────────────
+(function loadCurrentAvatar() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const el = document.getElementById('profileAvatarEl');
+  if (!el) return;
+  if (user.avatar) {
+    el.innerHTML = `<img src="${user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  } else {
+    el.textContent = (user.username || 'U')[0].toUpperCase();
+  }
+  // Hiển thị username trên trang
+  const nameEl = document.querySelector('.profile-name');
+  const handleEl = document.querySelector('.profile-handle');
+  if (nameEl && user.username) nameEl.textContent = user.username;
+  if (handleEl && user.username) handleEl.textContent = `@${user.username}`;
+
+  // Ẩn nút follow/upload nếu đây là trang của chính mình
+  const urlParams = new URLSearchParams(location.search);
+  const isOwn = !urlParams.get('id') || urlParams.get('id') === user._id;
+  if (!isOwn) {
+    document.getElementById('avatarInput')?.remove();
+    document.getElementById('coverInput')?.remove();
+    const camBadge = document.querySelector('#profileAvatarWrap div:last-child');
+    if (camBadge) camBadge.style.display = 'none';
+    document.getElementById('profileAvatarWrap').style.cursor = 'default';
+    document.getElementById('profileCover').style.cursor = 'default';
+    const editBtn = document.querySelector('.profile-cover-edit');
+    if (editBtn) editBtn.style.display = 'none';
+  } else {
+    const followBtn = document.getElementById('followBtn');
+    if (followBtn) followBtn.style.display = 'none';
+  }
+})();
+
+// ── Avatar upload ─────────────────────────────────────────────────────────
+function triggerAvatarUpload() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const urlParams = new URLSearchParams(location.search);
+  const isOwn = !urlParams.get('id') || urlParams.get('id') === user._id;
+  if (!isOwn) return;
+  document.getElementById('avatarInput').click();
+}
+
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Preview ngay lập tức
+  const el = document.getElementById('profileAvatarEl');
+  SSUpload.previewFile(file, (() => {
+    el.innerHTML = '<img id="_avatarPreviewImg" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    return document.getElementById('_avatarPreviewImg');
+  })());
+
+  toast('Đang tải ảnh lên...', 'info');
+  try {
+    const url = await SSUpload.uploadAvatar(file);
+    el.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    toast('✅ Đổi avatar thành công!', 'success');
+  } catch (err) {
+    toast(err.message || 'Upload thất bại', 'error');
+  }
+}
+
+// ── Cover upload ──────────────────────────────────────────────────────────
+function triggerCoverUpload() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const urlParams = new URLSearchParams(location.search);
+  const isOwn = !urlParams.get('id') || urlParams.get('id') === user._id;
+  if (!isOwn) return;
+  document.getElementById('coverInput').click();
+}
+
+async function handleCoverUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const cover = document.getElementById('profileCover');
+
+  // Preview
+  const reader = new FileReader();
+  reader.onload = e => {
+    cover.style.backgroundImage = `url(${e.target.result})`;
+    cover.style.backgroundSize  = 'cover';
+    cover.style.backgroundPosition = 'center';
+  };
+  reader.readAsDataURL(file);
+
+  toast('Đang tải ảnh bìa lên...', 'info');
+  try {
+    const url = await SSUpload.uploadCover(file);
+    cover.style.backgroundImage = `url(${url})`;
+    toast('✅ Đổi ảnh bìa thành công!', 'success');
+  } catch (err) {
+    toast(err.message || 'Upload thất bại', 'error');
+  }
+}
+</script>
+</body>
+</html>

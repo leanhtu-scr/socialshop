@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Đăng nhập</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app">
+  <div class="auth-wrap">
+
+    <div class="auth-hero">
+      <div class="logo">SocialShop</div>
+      <p>Kết nối, chia sẻ và mua bán — tất cả ở một nơi.</p>
+    </div>
+
+    <form class="auth-card" id="loginForm" onsubmit="event.preventDefault(); handleLogin(this);">
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input id="loginEmail" name="email" type="email" placeholder="ban@email.com" required>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Mật khẩu</label>
+        <input id="loginPassword" name="password" type="password" placeholder="••••••••" required minlength="6">
+      </div>
+      <button type="submit" class="btn-primary">Đăng nhập</button>
+      <div class="auth-switch">Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></div>
+    </form>
+
+    <p class="auth-note">
+      Cần backend đang chạy ở <span class="mono">localhost:5000</span> (xem
+      <span class="mono">server/README</span>). Nếu chưa chạy server, đăng nhập sẽ báo lỗi mạng.
+    </p>
+
+  </div>
+
+  <div class="site-footer standalone">
+    <div class="line1">Website bởi Lê Anh Tú</div>
+    <div class="line2" id="footerDayCount">Đang tính ngày xây dựng...</div>
+  </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/app.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>

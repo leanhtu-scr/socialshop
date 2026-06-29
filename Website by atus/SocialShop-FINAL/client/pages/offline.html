@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Offline</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.offline-wrap {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+  gap: 16px;
+}
+.offline-icon { font-size: 72px; line-height: 1; }
+.offline-title { font-size: 22px; font-weight: 700; }
+.offline-sub { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 300px; }
+.offline-btn {
+  margin-top: 8px;
+  padding: 13px 32px;
+  background: var(--grad);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="offline-wrap">
+  <div class="offline-icon">📡</div>
+  <h1 class="offline-title">Không có kết nối</h1>
+  <p class="offline-sub">Kiểm tra lại Wi-Fi hoặc dữ liệu di động, sau đó thử lại.</p>
+  <button class="offline-btn" onclick="location.reload()">Thử lại</button>
+</div>
+</body>
+</html>

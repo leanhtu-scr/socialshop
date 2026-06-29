@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/social-bar.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <span class="logo">SocialShop</span>
+    <div class="search-wrap">
+      <span>🔍</span>
+      <input type="text" placeholder="Tìm bạn bè, sản phẩm, video...">
+    </div>
+    <a class="icon-btn" id="authLink" href="pages/login.html">👤</a>
+    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  </header>
+
+  <!-- ===== SOCIAL APP LINK BAR ===== -->
+  <div class="social-app-bar">
+    <div class="social-bar-track">
+
+      <!-- Threads -->
+      <a class="sab-item" href="https://www.threads.net" target="_blank" rel="noopener" aria-label="Threads">
+        <div class="sab-icon threads">
+          <svg viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M141.537 88.988a66.667 66.667 0 0 0-2.518-1.143c-1.482-27.307-16.403-42.94-41.457-43.1h-.34c-14.986 0-27.449 6.396-35.12 18.036l13.779 9.452c5.73-8.695 14.724-10.548 21.348-10.548h.229c8.249.053 14.474 2.452 18.503 7.129 2.932 3.405 4.893 8.111 5.864 14.05-7.314-1.243-15.224-1.626-23.68-1.14-23.82 1.371-39.134 15.264-38.105 34.568.522 9.792 5.4 18.216 13.735 23.719 7.047 4.652 16.124 6.927 25.557 6.412 12.458-.683 22.231-5.436 29.05-14.127 5.177-6.6 8.452-15.153 9.879-25.93 5.92 3.577 10.304 8.297 12.786 13.966 4.236 9.69 4.477 25.608-8.362 38.43-11.27 11.26-24.838 16.14-45.32 16.29-22.71-.168-39.894-7.453-51.086-21.674C92.966 150.308 87 132.84 86.775 112h-17.5c.233 25.18 7.712 46.05 21.714 60.44 12.757 13.11 30.355 19.92 52.367 20.227h.2c25.267-.18 44.533-7.553 59.239-22.238 17.994-17.97 17.535-40.38 11.542-54.125-4.136-9.457-12.08-17.123-22.8-22.316Zm-39.727 40.173c-10.426.585-21.258-4.092-21.8-14.127-.4-7.503 5.33-15.876 22.58-16.875 1.974-.114 3.917-.169 5.831-.169 6.151 0 11.92.606 17.233 1.778-1.962 24.25-13.894 28.793-23.844 29.393Z" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="sab-label">Threads</span>
+      </a>
+
+      <!-- Instagram -->
+      <a class="sab-item" href="https://www.instagram.com" target="_blank" rel="noopener" aria-label="Instagram">
+        <div class="sab-icon instagram">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5.5" stroke="url(#ig-grad)" stroke-width="2"/>
+            <circle cx="12" cy="12" r="4.5" stroke="url(#ig-grad)" stroke-width="2"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="url(#ig-grad)"/>
+            <defs>
+              <linearGradient id="ig-grad" x1="2" y1="22" x2="22" y2="2" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FFDC80"/>
+                <stop offset="0.3" stop-color="#F77737"/>
+                <stop offset="0.65" stop-color="#C13584"/>
+                <stop offset="1" stop-color="#833AB4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <span class="sab-label">Instagram</span>
+      </a>
+
+      <!-- Facebook -->
+      <a class="sab-item" href="https://www.facebook.com" target="_blank" rel="noopener" aria-label="Facebook">
+        <div class="sab-icon facebook">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" fill="#1877F2"/>
+            <path d="M16 8h-2a1 1 0 0 0-1 1v2h3l-.5 3H13v7h-3v-7H8v-3h2V9a4 4 0 0 1 4-4h2v3Z" fill="white"/>
+          </svg>
+        </div>
+        <span class="sab-label">Facebook</span>
+      </a>
+
+      <!-- TikTok -->
+      <a class="sab-item" href="https://www.tiktok.com" target="_blank" rel="noopener" aria-label="TikTok">
+        <div class="sab-icon tiktok">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- shadow cyan -->
+            <path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="#69C9D0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" transform="translate(0.7,0.7)"/>
+            <!-- main white/red -->
+            <path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="#EE1D52" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(-0.4,-0.4)"/>
+          </svg>
+        </div>
+        <span class="sab-label">TikTok</span>
+      </a>
+
+      <!-- GitHub -->
+      <a class="sab-item" href="https://www.github.com" target="_blank" rel="noopener" aria-label="GitHub">
+        <div class="sab-icon github">
+          <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2Z"/>
+          </svg>
+        </div>
+        <span class="sab-label">GitHub</span>
+      </a>
+
+      <!-- Facebook Marketplace -->
+      <a class="sab-item" href="https://www.facebook.com/marketplace" target="_blank" rel="noopener" aria-label="FB Marketplace">
+        <div class="sab-icon fb-market">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" fill="#1877F2"/>
+            <path d="M7 10.5a1 1 0 0 1 .895-.553h8.21a1 1 0 0 1 .894.553l1 2A1 1 0 0 1 17 14h-1v3.5a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V15h-1v2.5a.5.5 0 0 1-.5.5H9a.5.5 0 0 1-.5-.5V14H7a1 1 0 0 1-.895-1.447l.895-2.053Z" fill="white"/>
+          </svg>
+        </div>
+        <span class="sab-label">Marketplace</span>
+      </a>
+
+      <!-- TikTok Shop -->
+      <a class="sab-item" href="https://shop.tiktok.com" target="_blank" rel="noopener" aria-label="TikTok Shop">
+        <div class="sab-icon tiktok-shop">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="6" fill="#010101"/>
+            <!-- tiktok note small -->
+            <path d="M12.5 6.5V15a2.5 2.5 0 1 1-2.5-2.5h.5V10h-.5a5 5 0 1 0 5 5V8a5.5 5.5 0 0 0 3.5 1.2V6.9A3.2 3.2 0 0 1 15.3 4 3.2 3.2 0 0 1 12.5 6.5Z" stroke="#EE1D52" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M12.5 6.5V15a2.5 2.5 0 1 1-2.5-2.5h.5V10h-.5a5 5 0 1 0 5 5V8a5.5 5.5 0 0 0 3.5 1.2V6.9A3.2 3.2 0 0 1 15.3 4 3.2 3.2 0 0 1 12.5 6.5Z" stroke="#69C9D0" stroke-width="0.8" stroke-linecap="round" transform="translate(0.4,0)"/>
+            <!-- cart badge -->
+            <circle cx="18" cy="6" r="4" fill="#EE1D52"/>
+            <path d="M16 5h4M18 3v4" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="sab-label">TT Shop</span>
+      </a>
+
+      <!-- YouTube -->
+      <a class="sab-item" href="https://www.youtube.com" target="_blank" rel="noopener" aria-label="YouTube">
+        <div class="sab-icon youtube">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0000"/>
+            <path d="M10 9l6 3-6 3V9Z" fill="white"/>
+          </svg>
+        </div>
+        <span class="sab-label">YouTube</span>
+      </a>
+
+    </div>
+  </div>
+  <!-- ===== END SOCIAL APP LINK BAR ===== -->
+
+  <!-- Story bar -->
+  <div class="story-bar">
+    <div class="story add">
+      <div class="story-ring"><span class="plus">＋</span></div>
+      <span class="name">Tạo story</span>
+    </div>
+    <div class="story" onclick="openStory('Minh Anh')">
+      <div class="story-ring live"><img src="" alt=""></div>
+      <span class="name">Minh Anh</span>
+    </div>
+    <div class="story" onclick="openStory('Thảo Vy')">
+      <div class="story-ring"><img src="" alt=""></div>
+      <span class="name">Thảo Vy</span>
+    </div>
+    <div class="story" onclick="openStory('Đăng Khoa')">
+      <div class="story-ring seen"><img src="" alt=""></div>
+      <span class="name">Đăng Khoa</span>
+    </div>
+    <div class="story" onclick="openStory('Linh Chi')">
+      <div class="story-ring"><img src="" alt=""></div>
+      <span class="name">Linh Chi</span>
+    </div>
+    <div class="story" onclick="openStory('Gia Bảo')">
+      <div class="story-ring seen"><img src="" alt=""></div>
+      <span class="name">Gia Bảo</span>
+    </div>
+  </div>
+
+  <!-- Skeleton (shown first, simulates loading feed from API) -->
+  <div class="feed" id="feedSkeleton">
+    <div class="card" style="padding:14px;">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="skel skel-avatar"></div>
+        <div style="flex:1;">
+          <div class="skel skel-line" style="width:40%;"></div>
+          <div class="skel skel-line" style="width:25%;"></div>
+        </div>
+      </div>
+      <div class="skel skel-card" style="margin-top:12px;"></div>
+    </div>
+    <div class="card" style="padding:14px;">
+      <div style="display:flex;gap:10px;align-items:center;">
+        <div class="skel skel-avatar"></div>
+        <div style="flex:1;">
+          <div class="skel skel-line" style="width:50%;"></div>
+          <div class="skel skel-line" style="width:30%;"></div>
+        </div>
+      </div>
+      <div class="skel skel-card" style="margin-top:12px;height:120px;"></div>
+    </div>
+  </div>
+
+  <!-- Real feed content -->
+  <div class="feed hidden" id="feedContent">
+
+    <!-- Social post -->
+    <article class="card">
+      <div class="post-head">
+        <div class="avatar"></div>
+        <div class="meta">
+          <div class="uname">Minh Anh</div>
+          <div class="time">12 phút trước · 🌐</div>
+        </div>
+        <button class="icon-btn">⋯</button>
+      </div>
+      <p class="post-text">Cuối tuần này đẹp trời quá, đi cà phê thôi nào ☕️✨</p>
+      <div class="post-media grad-1"></div>
+      <div class="post-actions">
+        <button class="act-btn" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+          <span class="like-count">128</span>
+        </button>
+        <button class="act-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+          <span>24</span>
+        </button>
+        <button class="act-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+          <span>Chia sẻ</span>
+        </button>
+        <button class="act-btn save" onclick="toggleSave(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>
+        </button>
+      </div>
+    </article>
+
+    <!-- Marketplace product inside feed -->
+    <article class="card product-card">
+      <div class="product-thumb"></div>
+      <div class="product-info">
+        <span class="badge">FLASH SALE</span>
+        <div class="product-title">Tai nghe Bluetooth Pro Max ANC</div>
+        <div>
+          <span class="product-price">329.000₫</span>
+          <span class="product-old">590.000₫</span>
+        </div>
+        <button class="buy-btn" onclick="addToCart('Tai nghe Bluetooth Pro Max ANC', 329000)">Thêm vào giỏ</button>
+      </div>
+    </article>
+
+    <!-- Social post 2 -->
+    <article class="card">
+      <div class="post-head">
+        <div class="avatar"></div>
+        <div class="meta">
+          <div class="uname">Thảo Vy</div>
+          <div class="time">1 giờ trước · 👥 Bạn bè</div>
+        </div>
+        <button class="icon-btn">⋯</button>
+      </div>
+      <p class="post-text">Set đồ mới về, các bạn thấy sao? 🧡</p>
+      <div class="post-media grad-3"></div>
+      <div class="post-actions">
+        <button class="act-btn liked" onclick="toggleLike(this)">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+          <span class="like-count">312</span>
+        </button>
+        <button class="act-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+          <span>57</span>
+        </button>
+        <button class="act-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+          <span>Chia sẻ</span>
+        </button>
+        <button class="act-btn save" onclick="toggleSave(this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg>
+        </button>
+      </div>
+    </article>
+
+    <!-- TikTok-style short video card -->
+    <article class="card tiktok-card" onclick="toast('Mở video (sắp ra mắt)', 'accent')">
+      <div class="tiktok-thumb grad-2">
+        <div class="tiktok-play">
+          <svg viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+        </div>
+        <div class="tiktok-badge">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="#69C9D0" stroke-width="2" stroke-linecap="round"/><path d="M9.5 13.5a4 4 0 1 0 4 4V5.5a5.5 5.5 0 0 0 5.5 5.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
+          TikTok Shop
+        </div>
+      </div>
+      <div class="tiktok-meta">
+        <span class="tiktok-username">@fashionstore_vn</span>
+        <span class="tiktok-desc">Deal sốc hôm nay – giảm đến 70% 🔥</span>
+        <a class="tiktok-shop-btn" onclick="event.stopPropagation();addToCart('Set thời trang TikTok Shop', 199000)">
+          🛍 Mua ngay 199k
+        </a>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- Cart FAB -->
+  <button class="cart-fab" onclick="toast('Mở giỏ hàng', 'accent')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4ZM3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    <span class="count">0</span>
+  </button>
+
+  <!-- Bottom navigation -->
+  <nav class="bottom-nav">
+    <div class="site-footer">
+      <div class="line1">Website bởi Lê Anh Tú</div>
+      <div class="line2" id="footerDayCount">Đang tính ngày xây dựng...</div>
+    </div>
+    <div class="nav-row">
+    <a class="nav-item active" data-page="index.html" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>
+      Trang chủ
+    </a>
+    <a class="nav-item" data-page="pages/marketplace.html" href="pages/marketplace.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9 4 4h16l1 5M3 9v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9M3 9h18M9 13a3 3 0 0 0 6 0"/></svg>
+      Chợ
+    </a>
+    <a class="nav-item center" href="#" onclick="toast('Mở camera tạo bài viết')">
+      <span class="nav-bubble">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </a>
+    <a class="nav-item" data-page="pages/chat.html" href="#" onclick="toast('Tin nhắn (sắp ra mắt)')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+      Chat
+      <span class="dot"></span>
+    </a>
+    <a class="nav-item" href="pages/profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      Cá nhân
+    </a>
+    </div>
+  </nav>
+
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  revealContent('feedSkeleton', 'feedContent', 1000);
+</script>
+</body>
+</html>

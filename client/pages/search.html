@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SocialShop — Tìm kiếm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.search-page-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px; position:sticky; top:0; z-index:40;
+  background:var(--bg); backdrop-filter:blur(8px);
+}
+.search-page-input {
+  flex:1; display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--primary);
+  border-radius:999px; padding:10px 16px;
+}
+.search-page-input input {
+  flex:1; background:none; border:none; outline:none;
+  color:var(--text); font-size:15px;
+}
+.search-cancel { font-size:14px; color:var(--primary); font-weight:600; white-space:nowrap; }
+
+.search-tabs {
+  display:flex; gap:6px; padding:6px 16px 10px;
+  overflow-x:auto; scrollbar-width:none;
+  border-bottom:1px solid var(--border);
+}
+.stab {
+  padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600;
+  white-space:nowrap; cursor:pointer; transition:all .2s;
+  background:var(--surface); color:var(--text-dim); border:1px solid var(--border);
+}
+.stab.active { background:var(--grad); color:#fff; border-color:transparent; }
+
+/* Trending */
+.trending-section { padding:14px 16px; }
+.trending-title { font-size:14px; font-weight:700; margin-bottom:10px; }
+.trending-tags { display:flex; flex-wrap:wrap; gap:8px; }
+.trend-tag {
+  padding:7px 14px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--border);
+  font-size:13px; cursor:pointer; transition:all .15s;
+}
+.trend-tag:active { background:var(--surface-strong); }
+.trend-tag span { font-size:11px; color:var(--text-faint); margin-left:4px; }
+
+/* Results */
+.search-results { padding:6px 0; }
+.result-section-hdr {
+  padding:10px 16px 6px; font-size:12px; font-weight:700;
+  color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em;
+}
+
+/* User result */
+.user-result {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px; cursor:pointer; transition:background .15s;
+}
+.user-result:active { background:var(--surface); }
+.user-result-av {
+  width:44px; height:44px; border-radius:50%;
+  background:var(--grad); display:flex; align-items:center;
+  justify-content:center; font-size:18px; flex-shrink:0;
+}
+.user-result-name { font-size:14px; font-weight:600; }
+.user-result-bio { font-size:12px; color:var(--text-dim); margin-top:1px; }
+.follow-btn-sm {
+  padding:6px 14px; border-radius:8px; font-size:12px; font-weight:600;
+  background:var(--primary); color:#fff; flex-shrink:0; transition:transform .15s;
+}
+.follow-btn-sm:active { transform:scale(0.95); }
+
+/* Product result */
+.product-result {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px; cursor:pointer; transition:background .15s;
+}
+.product-result:active { background:var(--surface); }
+.product-result-img {
+  width:56px; height:56px; border-radius:12px;
+  background:var(--surface); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:24px;
+  overflow:hidden;
+}
+.product-result-img img { width:100%; height:100%; object-fit:cover; }
+.product-result-name { font-size:14px; font-weight:600; }
+.product-result-price { font-size:13px; color:var(--primary); font-weight:700; margin-top:2px; }
+
+/* Empty state */
+.search-empty {
+  display:flex; flex-direction:column; align-items:center;
+  padding:48px 24px; gap:10px; text-align:center;
+}
+.search-empty-icon { font-size:48px; }
+.search-empty-title { font-size:16px; font-weight:700; }
+.search-empty-sub { font-size:13px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Search bar -->
+  <div class="search-page-bar">
+    <div class="search-page-input">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="Tìm bạn bè, sản phẩm, bài viết..."
+        autofocus oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <a class="search-cancel" href="../index.html">Hủy</a>
+  </div>
+
+  <!-- Tabs -->
+  <div class="search-tabs">
+    <div class="stab active" onclick="switchTab(this,'all')">Tất cả</div>
+    <div class="stab" onclick="switchTab(this,'user')">Người dùng</div>
+    <div class="stab" onclick="switchTab(this,'product')">Sản phẩm</div>
+    <div class="stab" onclick="switchTab(this,'post')">Bài viết</div>
+  </div>
+
+  <!-- Content -->
+  <div id="searchContent">
+
+    <!-- Trending (default) -->
+    <div id="trendingView">
+      <div class="trending-section">
+        <div class="trending-title">🔥 Đang thịnh hành</div>
+        <div class="trending-tags">
+          <div class="trend-tag" onclick="setSearch('#thoitrang')">#thoitrang <span>2.4k</span></div>
+          <div class="trend-tag" onclick="setSearch('#flashsale')">#flashsale <span>1.8k</span></div>
+          <div class="trend-tag" onclick="setSearch('#dienmay')">#dienmay <span>1.2k</span></div>
+          <div class="trend-tag" onclick="setSearch('#hanquoc')">#hanquoc <span>980</span></div>
+          <div class="trend-tag" onclick="setSearch('#skincare')">#skincare <span>870</span></div>
+          <div class="trend-tag" onclick="setSearch('#giay')">#giay <span>750</span></div>
+          <div class="trend-tag" onclick="setSearch('#muadong')">#muadong <span>620</span></div>
+          <div class="trend-tag" onclick="setSearch('#giamgia')">#giamgia <span>560</span></div>
+        </div>
+      </div>
+
+      <div class="trending-section">
+        <div class="trending-title">👥 Gợi ý kết bạn</div>
+        <div id="suggestedUsers"></div>
+      </div>
+
+      <div class="trending-section">
+        <div class="trending-title">🛍️ Sản phẩm nổi bật</div>
+        <div id="featuredProducts"></div>
+      </div>
+    </div>
+
+    <!-- Results view -->
+    <div id="resultsView" class="search-results" style="display:none"></div>
+
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="../index.html"><span class="nav-icon">🏠</span><span class="nav-label">Feed</span></a>
+  <a class="nav-item" href="marketplace.html"><span class="nav-icon">🛍️</span><span class="nav-label">Shop</span></a>
+  <a class="nav-item" href="chat.html"><span class="nav-icon">💬</span><span class="nav-label">Chat</span></a>
+  <a class="nav-item" href="notifications.html"><span class="nav-icon">🔔</span><span class="nav-label">Thông báo</span></a>
+  <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span><span class="nav-label">Tôi</span></a>
+</nav>
+
+<script src="../js/config.js"></script>
+<script>
+const API = window.API_BASE || 'http://localhost:5000/api';
+const token = localStorage.getItem('token');
+let currentTab = 'all';
+let searchTimer;
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSuggestions();
+});
+
+function onSearchInput(q) {
+  clearTimeout(searchTimer);
+  if (!q.trim()) { showTrending(); return; }
+  searchTimer = setTimeout(() => doSearch(q), 400);
+}
+
+async function doSearch(q) {
+  q = q || document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  showResults();
+  const el = document.getElementById('resultsView');
+  el.innerHTML = `<div style="padding:20px 16px;color:var(--text-faint);text-align:center">Đang tìm...</div>`;
+
+  try {
+    const res = await fetch(`${API}/search?q=${encodeURIComponent(q)}&type=${currentTab}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    renderResults(data, q);
+  } catch {
+    // Demo results
+    renderResults(getDemoResults(q), q);
+  }
+}
+
+function getDemoResults(q) {
+  return {
+    users: [
+      { _id:'u1', username:'Minh Anh Lê', bio:'Yêu thích thời trang', followersCount:1234 },
+      { _id:'u2', username:'Hoàng Nam', bio:'Người bán hàng tích cực', followersCount:892 },
+    ].filter(u => u.username.toLowerCase().includes(q.toLowerCase()) || true),
+    products: [
+      { _id:'p1', name:'Áo hoodie gradient', price:280000, category:'Thời trang' },
+      { _id:'p2', name:'Tai nghe không dây', price:850000, category:'Điện máy' },
+    ],
+    posts: []
+  };
+}
+
+function renderResults(data, q) {
+  const el = document.getElementById('resultsView');
+  const { users=[], products=[], posts=[] } = data;
+
+  if (!users.length && !products.length && !posts.length) {
+    el.innerHTML = `
+      <div class="search-empty">
+        <div class="search-empty-icon">🔍</div>
+        <div class="search-empty-title">Không tìm thấy kết quả</div>
+        <div class="search-empty-sub">Thử tìm kiếm với từ khóa khác</div>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+
+  if (users.length && (currentTab === 'all' || currentTab === 'user')) {
+    html += `<div class="result-section-hdr">👥 Người dùng</div>`;
+    html += users.map(u => `
+      <div class="user-result" onclick="window.location.href='profile.html?id=${u._id}'">
+        <div class="user-result-av">${(u.username||'?')[0].toUpperCase()}</div>
+        <div style="flex:1">
+          <div class="user-result-name">${u.username}</div>
+          <div class="user-result-bio">${u.bio||'SocialShop member'} · ${formatNum(u.followersCount||0)} người theo dõi</div>
+        </div>
+        <button class="follow-btn-sm" onclick="toggleFollow('${u._id}',this,event)">Theo dõi</button>
+      </div>`).join('');
+  }
+
+  if (products.length && (currentTab === 'all' || currentTab === 'product')) {
+    html += `<div class="result-section-hdr">🛍️ Sản phẩm</div>`;
+    html += products.map(p => `
+      <div class="product-result" onclick="window.location.href='product-detail.html?id=${p._id}'">
+        <div class="product-result-img">
+          ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}">` : '📦'}
+        </div>
+        <div style="flex:1">
+          <div class="product-result-name">${p.name}</div>
+          <div class="product-result-price">${formatPrice(p.price)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  if (posts.length && (currentTab === 'all' || currentTab === 'post')) {
+    html += `<div class="result-section-hdr">📝 Bài viết</div>`;
+    html += posts.map(p => `
+      <div class="product-result" onclick="window.location.href='../index.html#post-${p._id}'">
+        <div style="width:56px;height:56px;border-radius:12px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📝</div>
+        <div style="flex:1">
+          <div class="product-result-name" style="font-size:13px">${p.content?.slice(0,80)||'...'}</div>
+          <div class="product-result-price" style="color:var(--text-dim)">${p.author?.username} · ${formatNum(p.likes?.length||0)} lượt thích</div>
+        </div>
+      </div>`).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+async function loadSuggestions() {
+  // demo suggestions
+  const users = [
+    { _id:'u1', username:'Minh Anh', bio:'Yêu thời trang', followersCount:1234 },
+    { _id:'u2', username:'Hoàng Nam', bio:'Người bán hàng', followersCount:892 },
+    { _id:'u3', username:'Thu Hà', bio:'Beauty blogger', followersCount:2341 },
+  ];
+  document.getElementById('suggestedUsers').innerHTML = users.map(u => `
+    <div class="user-result">
+      <div class="user-result-av">${u.username[0].toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="user-result-name">${u.username}</div>
+        <div class="user-result-bio">${u.bio} · ${formatNum(u.followersCount)} followers</div>
+      </div>
+      <button class="follow-btn-sm" onclick="toggleFollow('${u._id}',this,event)">Theo dõi</button>
+    </div>`).join('');
+
+  document.getElementById('featuredProducts').innerHTML = [
+    { name:'Áo hoodie gradient', price:280000 },
+    { name:'Đèn LED thông minh', price:199000 },
+  ].map(p => `
+    <div class="product-result">
+      <div class="product-result-img">📦</div>
+      <div style="flex:1">
+        <div class="product-result-name">${p.name}</div>
+        <div class="product-result-price">${formatPrice(p.price)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function setSearch(q) {
+  document.getElementById('searchInput').value = q;
+  doSearch(q);
+}
+
+function switchTab(el, tab) {
+  document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  const q = document.getElementById('searchInput').value.trim();
+  if (q) doSearch(q);
+}
+
+function showTrending() {
+  document.getElementById('trendingView').style.display = 'block';
+  document.getElementById('resultsView').style.display = 'none';
+}
+
+function showResults() {
+  document.getElementById('trendingView').style.display = 'none';
+  document.getElementById('resultsView').style.display = 'block';
+}
+
+async function toggleFollow(userId, btn, e) {
+  e.stopPropagation();
+  const following = btn.textContent === 'Đang theo dõi';
+  try {
+    await fetch(`${API}/users/${userId}/follow`, {
+      method:'POST', headers:{ Authorization:`Bearer ${token}` }
+    });
+  } catch {}
+  btn.textContent = following ? 'Theo dõi' : 'Đang theo dõi';
+  btn.style.background = following ? 'var(--primary)' : 'var(--surface)';
+  btn.style.color = following ? '#fff' : 'var(--text)';
+}
+
+function formatNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return n;
+}
+function formatPrice(p) {
+  return new Intl.NumberFormat('vi-VN', { style:'currency', currency:'VND' }).format(p);
+}
+function toggleTheme() {
+  const c = document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', c==='dark'?'light':'dark');
+}
+</script>
+</body>
+</html>
